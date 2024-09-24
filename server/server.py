@@ -41,7 +41,7 @@ def register():
         new_user.set_password(password)
         
         db.session.add(new_user)
-        db.session.commit()
+        db.session.commit() # save the user to the database
         flash('Account created successfully', 'success')
         return redirect(url_for('login'))
 
@@ -58,6 +58,8 @@ def login():
         if user and user.check_password(password):
             # store the user's id in the session
             session['user_id'] = user.id
+            session.permanent = True # this makes the session last for the set lifetime
+            
             flash('Login successful', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -67,7 +69,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()
+    session.clear() # clear session data
     flash('You have been logged out', 'info')
     return redirect(url_for('home'))
 

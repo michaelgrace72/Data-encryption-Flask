@@ -14,3 +14,6 @@ class Config:
   #construct the database URI
   SQLALCHEMY_DATABASE_URI = f'postgresql://{user}:{password}@{host}/{database}'
   SQLALCHEMY_Track_MODIFICATIONS = False
+
+  # set session expiration time to 30 minutes
+  PERMANENT_SESSION_LIFETIME = 1800
