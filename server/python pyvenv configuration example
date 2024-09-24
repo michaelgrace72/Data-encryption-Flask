@@ -1,0 +1,8 @@
+put it in venv directory
+
+Home = C:\pathToYourPythonEnvironment
+include-system-site-packages = false
+version = 3.12.0
+executable = C:\pathToYourPythonEnvironment\python.exe
+command = C:\pathToYourPythonEnvironment\python.exe -m venv C:\pathToYourPythonProjectDirectory
+

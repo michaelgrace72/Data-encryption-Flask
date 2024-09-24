@@ -1,0 +1,3 @@
+flask==3.0.3
+psycopg2==2.9.9
+wekzeug==3.0.4
