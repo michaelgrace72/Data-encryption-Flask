@@ -7,11 +7,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-  
-  <div>Welcome View</div>
 
-  <a href="{{url_for('register')}}">Signup</a><br>
-  <a href="{{url_for('login')}}">Login</a>
+<div class="bg-white dark:bg-gray-800 flex justify-center items-center h-screen">
+    <!-- Left: Image -->
+<div class="w-1/2 h-screen hidden lg:block">
+  <img src="https://media.infopay.net/uploads/--cbd148ab80ddc91b21fdb655448bd111.webp" alt="Placeholder Image" class="object-cover w-full h-full">
+</div>
+<div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
+  <h1 class="text-2xl font-bold text-center mb-8 dark:text-gray-200">Welcome!</h1>
+    <!-- Login Button -->
+    <form action="{{ url_for('login')}}">
+      <button type="submit" class="mb-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md py-2 px-4 w-full">Login</button>
+    </form>
+    <form action="{{url_for('register')}}">
+    <button type="submit" class="mb-16 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md py-2 px-4 w-full">Register</button>
+    </form>
 
+</div>
+</div>
 </body>
 </html>
