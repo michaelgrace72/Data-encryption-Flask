@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-  SECRET_KEY = os.urandom(32)
+  SECRET_KEY = os.getenv('SECRET_KEY')
   user = os.getenv('DB_USER')
   host = os.getenv('DB_HOST')
   password = os.getenv('DB_PASS')
