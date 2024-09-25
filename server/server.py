@@ -22,6 +22,48 @@ def dashboard():
     user = User.query.get(session['user_id'])
     return render_template('dashboard.html')
 
+@app.route('/aes-encryption', methods=['GET','POST'])
+def aes_encryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('AES_encrypt.html')
+
+@app.route('/aes-decryption/', methods=['GET'])
+def aes_decryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('AES_decrypt.html')
+
+@app.route('/des-encryption', methods=['GET','POST'])
+def des_encryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('DES_encrypt.html')
+
+@app.route('/des-decryption', methods=['GET','POST'])
+def des_decryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('DES_decrypt.html')
+
+@app.route('/rc4-encryption', methods=['GET','POST'])
+def rc4_encryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('RC4_encrypt.html')
+
+@app.route('/rc4-decryption', methods=['GET','POST'])
+def rc4_decryption():
+    if 'user_id' not in session:
+        flash('Please login first', 'warning')
+        return redirect(url_for('home'))
+    return render_template('RC4_decrypt.html')
+
 @app.route('/register', methods=['GET','POST'])
 def register():
     #if the request is a POST request, then the user has submitted the form
@@ -72,6 +114,7 @@ def logout():
     session.clear() # clear session data
     flash('You have been logged out', 'info')
     return redirect(url_for('home'))
+
 
 if __name__ == '__main__':
     with app.app_context():

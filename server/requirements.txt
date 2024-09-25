@@ -3,5 +3,5 @@ psycopg2==2.9.9
 wekzeug==3.0.4
 flask-jwt-extended==2.9.0
 python-dotenv
-flask-WTF=3.1.2
+flask-WTF==3.1.2
 Flask-SQLAlchemy

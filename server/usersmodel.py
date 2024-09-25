@@ -14,3 +14,24 @@ class User(db.Model):
 
   def check_password(self, password):
     return check_password_hash(self.password, password)
+
+class AesFile(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  filename = db.Column(db.String(255), nullable=False)
+  filetype = db.Column(db.String(255), nullable=False)
+  data = db.Column(db.LargeBinary, nullable=False)
+
+class DesFile(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  filename = db.Column(db.String(255), nullable=False)
+  filetype = db.Column(db.String(255), nullable=False)
+  data = db.Column(db.LargeBinary, nullable=False)
+  
+class Rc4File(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  filename = db.Column(db.String(255), nullable=False)
+  filetype = db.Column(db.String(255), nullable=False)
+  data = db.Column(db.LargeBinary, nullable=False)
