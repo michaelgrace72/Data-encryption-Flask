@@ -3,10 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Dashboard</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-  
+  <div id="body" class="bg-slate-100 h-screen flex">
+  <nav class="bg-gray-900 w-80 h-screen flex flex-col gap-10 border-r border-slate-100">
+        <div class="logo text-2xl font-bold text-white text-center h-16 flex items-center justify-center">Greeny</div>
+        <div class="user flex items-center justify-center flex-col gap-4 border-b border-emerald-slate-50 py-4">
+            <div class="flex flex-col items-center">
+                <span class="font-semibold text-lg text-emerald-700">Muhammed YEŞİLMEN</span>
+            </div>
+            <div class="text-sm text-slate-400">
+                <span class="font-semibold text-slate-500">Yönlendirilmiş Ticket Sayısı</span> (20)
+            </div>
+        </div>
+
+        <ul class="px-6 space-y-2">
+            <li>
+                <a class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-700 hover:scale-105 hover:text-white rounded-lg" href="#">Data Encryption Standard</a>
+            </li>
+            <li>
+                <a class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-700 hover:scale-105 hover:text-white rounded-lg" href="#">Rivest Cipher 4</a>
+            </li>
+            <li>
+                <a class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-700 hover:scale-105 hover:text-white rounded-lg" href="#">Advanced Encryption Standard <br> Cipher Feedback</a>
+            </li>
+            
+        </ul>
+  </nav>
+  <div class="right w-full flex gap-2 flex-col rounded">
+        <header class="h-16 w-full flex items-center p-4 text-slate-400 bg-white border-b-4 border-indigo-600 justify-between">
+            <ol class=" text-slate-400 flex flex-wrap gap-1 text-sm [&>li:last-child]:font-semibold [&>li:not(:first-child)]:before:content-['\00bb']">
+                <li class="before:content-['\2616'] before:mx-2"><span href="#">Homepage</a></li>
+            </ol>
+            <span class="p-4 flex text-slate-400 gap-1 text-sm ">
+              <a href="{{ url_for('logout')}}">Logout</a>
+            </span>
+        </header>
+
+
+        <div class="p-4">
+        {% block content %}
+        {% endblock %}
+        </div>
+    </div>
+</div>
 </body>
 </html>
