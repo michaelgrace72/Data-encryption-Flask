@@ -6,7 +6,7 @@
     {% if messages %}
         <div class="mb-4">
             {% for category, message in messages %}
-                <div class="p-4 mb-4 text-sm text-white rounded-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }}">
+                <div id="alert-message" class="p-4 mb-4 text-sm text-white rounded-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }}">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -14,9 +14,9 @@
     {% endif %}
 {% endwith %}
 <div class="container mx-auto p-4">
-<form action="{{ url_for('encrypt') }}" method="post" enctype="multipart/form-data" class="py-5 mx-auto">
+<form id="encryptionform" action="{{ url_for('encrypt') }}" method="post" enctype="multipart/form-data" class="py-5 mx-auto">
   <label for="encryption" class="block mb-2 text-large font-medium text-black">Select an option</label>
-  <select id="encryption" name="encryption" class="my-2 bg-gray-50 border border-gray-300 text-black-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+  <select id="encryption" name="encryption" class="my-2 bg-gray-50 border border-gray-300 text-black-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" >
     <option selected>Choose an encryption method</option>
     <option value="AES">Advanced Encryption Standard</option>
     <option value="RC4">Rivest Cipher 4</option>
@@ -27,4 +27,19 @@
   <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Upload and Encrypt</button>
 </form>
 </div>
+<script>
+    // prevent user submit without choosing an encryption method
+    document.getElementById('encryption').addEventListener('submit', function(event){
+        var encryptionMethod = document.getElementById('encryption').value;
+        if (encryptionMethod === "Choose an encryption method") {
+            event.preventDefault(); //prevent form submission
+            alert('Please select an encryption method');
+        }
+    });
+	// hide alert message after 3 seconds
+	setTimeout(() => {
+		document.getElementById('alert-message').style.display = 'none';
+	}, 3000);
+</script>
+
 {% endblock %}

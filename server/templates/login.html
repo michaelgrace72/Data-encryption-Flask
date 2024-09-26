@@ -38,7 +38,7 @@
         {% if messages %}
             <div class="mb-4">
                 {% for category, message in messages %}
-                    <div class="p-4 mb-4 text-sm text-white rounded-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }}">
+                    <div id="alert-message" class="p-4 mb-4 text-sm text-white rounded-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }}">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -51,6 +51,11 @@
 		</form>
 	</div>
 </div>
-
+<script>
+	// hide alert message after n seconds
+	setTimeout(() => {
+		document.getElementById('alert-message').style.display = 'none';
+	}, 3000);
+</script>
 </body>
 </html>

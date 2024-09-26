@@ -42,12 +42,6 @@ def inject_user():
 
 @app.route("/")
 def home():
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("login"))
-    user = User.query.get(user_id)
-    if not user:
-        return redirect(url_for("login"))
     return render_template("welcome.html")
 
 
@@ -93,7 +87,7 @@ def encrypt():
         file = request.files.get("file")
         user_id = session.get("user_id")
 
-        if not encryption_method:
+        if (encryption_method == "Choose an encryption method" or not encryption_method):
             flash("Please select an encryption method", "danger")
             return redirect(url_for("encrypt"))
 

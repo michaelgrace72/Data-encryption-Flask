@@ -5,3 +5,4 @@ flask-jwt-extended==2.9.0
 python-dotenv
 flask-WTF==3.1.2
 Flask-SQLAlchemy
+pycryptodome
