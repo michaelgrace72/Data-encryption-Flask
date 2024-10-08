@@ -7,15 +7,12 @@ import base64
 
 db = SQLAlchemy()
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    encryption_key = db.Column(
-        db.LargeBinary, nullable=False
-    )  # Store as a base64-encoded string
+    encryption_key = db.Column(db.LargeBinary, nullable=False)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -26,23 +23,26 @@ class User(db.Model):
 
 class AesFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     filetype = db.Column(db.String(255), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    data_oid = db.Column(db.Integer, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)  # Add file_size column
 
 
 class DesFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     filetype = db.Column(db.String(255), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    data_oid = db.Column(db.Integer, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)  # Add file_size column
 
 
 class Rc4File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     filetype = db.Column(db.String(255), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    data_oid = db.Column(db.Integer, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)  # Add file_size column
