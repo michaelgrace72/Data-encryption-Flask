@@ -1,73 +1,156 @@
 <!-- templates/shared_files.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Shared Files</title>
-</head>
-<body>
-    <h2>Files Shared by User ID {{ owner_id }}</h2>
-
-    <h3>AES Files</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Filename</th>
-                <th>File Size</th>
-                <th>Action</th>
-            </tr>
+{% extends "app.html"%} {% block content %}
+<h1 class="text-3xl font-bold mb-4">Files Shared by User ID: {{ owner_id }}</h1>
+<div class="p-4">
+  <div class="my-5">
+    <h2 class="text-2xl font-semibold mb-2">AES Encrypted Files</h2>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table
+        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      >
+        <thead
+          class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        >
+          <tr>
+            <th scope="col" class="px-6 py-3">Filename</th>
+            <th scope="col" class="px-6 py-3">File size</th>
+            <th scope="col" class="px-6 py-3">Download</th>
+          </tr>
         </thead>
         <tbody>
-            {% for file in aes_files %}
-            <tr>
-                <td>{{ file.filename }}</td>
-                <td>{{ file.file_size }} bytes</td>
-                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='AES', owner_id=owner_id) }}">Download</a></td>
-            </tr>
-            {% endfor %}
+          {% for file in aes_files %}
+          <tr
+            class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+          >
+            <th
+              scope="row"
+              name="filename"
+              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            >
+              {{ file.filename }}
+            </th>
+            <td name="file_size" class="px-6 py-4">{{file.file_size}} bytes</td>
+            <td class="px-6 py-4">
+              <a
+                href="{{ url_for('download_file', file_id=file.id, encryption_method='AES', owner_id=owner_id) }}"
+              >
+                <button
+                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                >
+                  Download
+                </button>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-
-    <h3>DES Files</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Filename</th>
-                <th>File Size</th>
-                <th>Action</th>
-            </tr>
+      </table>
+    </div>
+  </div>
+  <div class="my-5">
+    <h2 class="text-2xl font-semibold mb-2">RC4 Encrypted Files</h2>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table
+        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      >
+        <thead
+          class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        >
+          <tr>
+            <th scope="col" class="px-6 py-3">Filename</th>
+            <th scope="col" class="px-6 py-3">File Type</th>
+            <th scope="col" class="px-6 py-3">Download</th>
+          </tr>
         </thead>
         <tbody>
-            {% for file in des_files %}
-            <tr>
-                <td>{{ file.filename }}</td>
-                <td>{{ file.file_size }} bytes</td>
-                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='DES', owner_id=owner_id) }}">Download</a></td>
+          {% for file in rc4_files %}
+          <form action="{{ url_for('decrypt') }}" method="POST" class="inline">
+            <input type="hidden" name="file_id" value="{{ file.id }}" />
+            <input type="hidden" name="encryption" value="RC4" />
+            <tr
+              class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+            >
+              <th
+                scope="row"
+                name="filename"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                {{ file.filename }}
+              </th>
+              <td name="file_size" class="px-6 py-4">
+                {{file.file_size}} bytes
+              </td>
+              <td class="px-6 py-4">
+                <a
+                  href="{{ url_for('download_file', file_id=file.id, encryption_method='RC4', owner_id=owner_id) }}"
+                >
+                  <button
+                    type="submit"
+                    class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                  >
+                    Download
+                  </button>
+                </a>
+              </td>
             </tr>
-            {% endfor %}
+          </form>
+          {% endfor %}
         </tbody>
+      </table>
+    </div>
+  </div>
+  <h2 class="text-2xl font-semibold mb-2">DES Encrypted Files</h2>
+  <div class="relative overflow-x-auto mb-4 shadow-md sm:rounded-lg">
+    <table
+      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+    >
+      <thead
+        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+      >
+        <tr>
+          <th scope="col" class="px-6 py-3">Filename</th>
+          <th scope="col" class="px-6 py-3">File Type</th>
+          <th scope="col" class="px-6 py-3">Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in des_files %}
+        <form action="{{ url_for('decrypt') }}" method="POST" class="inline">
+          <input type="hidden" name="file_id" value="{{ file.id }}" />
+          <input type="hidden" name="encryption" value="DES" />
+          <tr
+            class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+          >
+            <th
+              scope="row"
+              name="filename"
+              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            >
+              {{ file.filename }}
+            </th>
+            <td name="file_size" class="px-6 py-4">{{file.file_size}} bytes</td>
+            <td class="px-6 py-4">
+              <a
+                href="{{ url_for('download_file', file_id=file.id, encryption_method='DES', owner_id=owner_id) }}"
+              >
+                <button
+                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                >
+                  Download
+                </button>
+              </a>
+            </td>
+          </tr>
+        </form>
+        {% endfor %}
+      </tbody>
     </table>
+  </div>
+  <a href="{{ url_for('choose_user') }}">
+    <button class="bg-gray-500 text-white px-4 py-2 rounded">
+      Back to Shared Files
+    </button>
+  </a>
+</div>
 
-    <h3>RC4 Files</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Filename</th>
-                <th>File Size</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for file in rc4_files %}
-            <tr>
-                <td>{{ file.filename }}</td>
-                <td>{{ file.file_size }} bytes</td>
-                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='RC4', owner_id=owner_id) }}">Download</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ url_for('choose_user') }}">Back to Choose User</a>
-</body>
-</html>
+{% endblock %}

@@ -13,7 +13,7 @@ import os
 import hashlib
 from flask_migrate import Migrate
 from model import db, User, AesFile, DesFile, Rc4File, ShareRequest, UserKeys
-from Crypto.Cipher import AES, DES, ARC4,PKCS1_OAEP
+from Crypto.Cipher import AES, DES, ARC4, PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import RSA
 from Crypto.Protocol.KDF import PBKDF2
@@ -29,12 +29,16 @@ from datetime import datetime, timedelta
 # Load master key from environment variable
 MASTER_KEY = os.getenv("MASTER_KEY")
 if not MASTER_KEY:
-    raise EnvironmentError("MASTER_KEY environment variable not found. Please set it in ~/.bashrc")
+    raise EnvironmentError(
+        "MASTER_KEY environment variable not found. Please set it in ~/.bashrc"
+    )
 
 # Verify length of MASTER_KEY
 REQUIRED_MASTER_KEY_LENGTH = 64  # 64 characters for a 256-bit key in hexadecimal format
 if len(MASTER_KEY) != REQUIRED_MASTER_KEY_LENGTH:
-    raise ValueError(f"MASTER_KEY must be {REQUIRED_MASTER_KEY_LENGTH} characters long (256-bit in hexadecimal).")
+    raise ValueError(
+        f"MASTER_KEY must be {REQUIRED_MASTER_KEY_LENGTH} characters long (256-bit in hexadecimal)."
+    )
 
 # Proceed with hashing or further use
 MASTER_KEY_HASH = hashlib.sha256(bytes.fromhex(MASTER_KEY)).hexdigest()
@@ -46,13 +50,19 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Setup logging
-logging.basicConfig(filename='encryption_performance.log', level=logging.INFO, format='%(asctime)s - %(message)s')
-log = logging.getLogger('werkzeug')
+logging.basicConfig(
+    filename="encryption_performance.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s",
+)
+log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
-error_logger = logging.getLogger('error_logger')
-error_handler = logging.FileHandler('error.log')
+error_logger = logging.getLogger("error_logger")
+error_handler = logging.FileHandler("error.log")
 error_handler.setLevel(logging.ERROR)
-error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+error_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+)
 error_logger.addHandler(error_handler)
 
 # Database connection
@@ -61,11 +71,13 @@ connection = engine.raw_connection()
 
 app.config["UPLOAD_FOLDER"] = "uploads/"
 
+
 @contextmanager
 def large_object_cursor():
     with connection.cursor() as cursor:
         yield cursor
     connection.commit()
+
 
 # Encrypt and decrypt user key using master key
 def encrypt_user_key(user_key, master_key):
@@ -76,22 +88,32 @@ def encrypt_user_key(user_key, master_key):
     encrypted_key = cipher.encrypt(user_key)
     return base64.b64encode(salt + iv + encrypted_key)
 
+
 def decrypt_user_key(encrypted_key_b64, master_key):
     encrypted_data = base64.b64decode(encrypted_key_b64)
-    salt, iv, encrypted_key = encrypted_data[:16], encrypted_data[16:32], encrypted_data[32:]
+    salt, iv, encrypted_key = (
+        encrypted_data[:16],
+        encrypted_data[16:32],
+        encrypted_data[32:],
+    )
     derived_key = PBKDF2(master_key, salt, dkLen=32)
     cipher = AES.new(derived_key, AES.MODE_CFB, iv)
     return cipher.decrypt(encrypted_key)
+
 
 @app.route("/")
 def home():
     return render_template("welcome.html")
 
+
 # Function to ensure log header exists
 def ensure_log_header():
-    if not os.path.exists('performance.log'):
-        with open('performance.log', 'w') as perf_log:
-            perf_log.write("Operation,Method,File_OID,File_Size_Bytes,Time_Taken_Seconds\n")
+    if not os.path.exists("performance.log"):
+        with open("performance.log", "w") as perf_log:
+            perf_log.write(
+                "Operation,Method,File_OID,File_Size_Bytes,Time_Taken_Seconds\n"
+            )
+
 
 # Encrypt AES large file in chunks
 def encrypt_aes_file_in_chunks(file_oid, key, file_size):
@@ -100,53 +122,55 @@ def encrypt_aes_file_in_chunks(file_oid, key, file_size):
         start_time = time.time()
         cipher = AES.new(key, AES.MODE_EAX)
         with large_object_cursor() as cursor:
-            lo = connection.lobject(file_oid, mode='rb')
-            encrypted_lo = connection.lobject(0, 'wb')
-            
+            lo = connection.lobject(file_oid, mode="rb")
+            encrypted_lo = connection.lobject(0, "wb")
+
             encrypted_lo.write(cipher.nonce)
             chunk = lo.read(1024 * 1024)
-            
+
             while chunk:
                 encrypted_lo.write(cipher.encrypt(chunk))
                 chunk = lo.read(1024 * 1024)
-                
+
             lo.close()
             encrypted_lo.close()
-            
+
         end_time = time.time()
         time_taken = end_time - start_time
         logging.info(f"AES encryption took {time_taken:.4f} seconds")
-        with open('performance.log', 'a') as perf_log:
+        with open("performance.log", "a") as perf_log:
             perf_log.write(f"Encrypt,AES,{file_oid},{file_size},{time_taken:.4f}\n")
         return encrypted_lo.oid
     except Exception as e:
         error_logger.error(f"Error encrypting file with AES. Error: {str(e)}")
         raise
 
+
 # Encrypt DES large file in chunks
 def encrypt_des_file_in_chunks(file_oid, key, file_size):
     ensure_log_header()
     start_time = time.time()
-    cipher = DES.new(key[:8].ljust(8, b'\0'), DES.MODE_CFB)
+    cipher = DES.new(key[:8].ljust(8, b"\0"), DES.MODE_CFB)
     with large_object_cursor() as cursor:
-        lo = connection.lobject(file_oid, mode='rb')
-        encrypted_lo = connection.lobject(0, 'wb')
-        
+        lo = connection.lobject(file_oid, mode="rb")
+        encrypted_lo = connection.lobject(0, "wb")
+
         encrypted_lo.write(cipher.iv)
         chunk = lo.read(1024 * 1024)
         while chunk:
             encrypted_lo.write(cipher.encrypt(chunk))
             chunk = lo.read(1024 * 1024)
-        
+
         lo.close()
         encrypted_lo.close()
-    
+
     end_time = time.time()
     time_taken = end_time - start_time
     logging.info(f"DES encryption took {time_taken:.4f} seconds")
-    with open('performance.log', 'a') as perf_log:
+    with open("performance.log", "a") as perf_log:
         perf_log.write(f"Encrypt,DES,{file_oid},{file_size},{time_taken:.4f}\n")
     return encrypted_lo.oid
+
 
 # Encrypt RC4 large file in chunks
 def encrypt_rc4_file_in_chunks(file_oid, key, file_size):
@@ -154,38 +178,39 @@ def encrypt_rc4_file_in_chunks(file_oid, key, file_size):
     start_time = time.time()
     cipher = ARC4.new(key)
     with large_object_cursor() as cursor:
-        lo = connection.lobject(file_oid, mode='rb')
-        encrypted_lo = connection.lobject(0, 'wb')
-        
+        lo = connection.lobject(file_oid, mode="rb")
+        encrypted_lo = connection.lobject(0, "wb")
+
         chunk = lo.read(1024 * 1024)
         while chunk:
             encrypted_lo.write(cipher.encrypt(chunk))
             chunk = lo.read(1024 * 1024)
-        
+
         lo.close()
         encrypted_lo.close()
-    
+
     end_time = time.time()
     time_taken = end_time - start_time
     logging.info(f"RC4 encryption took {time_taken:.4f} seconds")
-    with open('performance.log', 'a') as perf_log:
+    with open("performance.log", "a") as perf_log:
         perf_log.write(f"Encrypt,RC4,{file_oid},{file_size},{time_taken:.4f}\n")
     return encrypted_lo.oid
+
 
 def decrypt_aes_file_in_chunks(file_oid, key, file_size):
     try:
         ensure_log_header()
         start_time = time.time()
-        
+
         decrypted_data = io.BytesIO()
-        
+
         with large_object_cursor() as cursor:
-            lo = connection.lobject(file_oid, mode='rb')
-            
+            lo = connection.lobject(file_oid, mode="rb")
+
             # Read nonce first
             nonce = lo.read(16)
             cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
-            
+
             # Read and decrypt in chunks
             while True:
                 chunk = lo.read(1024 * 1024)  # 1MB chunks
@@ -193,36 +218,37 @@ def decrypt_aes_file_in_chunks(file_oid, key, file_size):
                     break
                 decrypted_chunk = cipher.decrypt(chunk)
                 decrypted_data.write(decrypted_chunk)
-            
+
             lo.close()
-        
+
         end_time = time.time()
         time_taken = end_time - start_time
         logging.info(f"AES decryption took {time_taken:.4f} seconds")
-        
-        with open('performance.log', 'a') as perf_log:
+
+        with open("performance.log", "a") as perf_log:
             perf_log.write(f"Decrypt,AES,{file_oid},{file_size},{time_taken:.4f}\n")
-        
+
         return decrypted_data.getvalue()
-        
+
     except Exception as e:
         error_logger.error(f"Error decrypting file with AES: {str(e)}")
         raise
+
 
 def decrypt_des_file_in_chunks(file_oid, key, file_size):
     try:
         ensure_log_header()
         start_time = time.time()
-        
+
         decrypted_data = io.BytesIO()
-        
+
         with large_object_cursor() as cursor:
-            lo = connection.lobject(file_oid, mode='rb')
-            
+            lo = connection.lobject(file_oid, mode="rb")
+
             # Read IV first
             iv = lo.read(8)
             cipher = DES.new(key[:8], DES.MODE_CFB, iv=iv)
-            
+
             # Read and decrypt in chunks
             while True:
                 chunk = lo.read(1024 * 1024)  # 1MB chunks
@@ -230,33 +256,34 @@ def decrypt_des_file_in_chunks(file_oid, key, file_size):
                     break
                 decrypted_chunk = cipher.decrypt(chunk)
                 decrypted_data.write(decrypted_chunk)
-            
+
             lo.close()
-        
+
         end_time = time.time()
         time_taken = end_time - start_time
         logging.info(f"DES decryption took {time_taken:.4f} seconds")
-        
-        with open('performance.log', 'a') as perf_log:
+
+        with open("performance.log", "a") as perf_log:
             perf_log.write(f"Decrypt,DES,{file_oid},{file_size},{time_taken:.4f}\n")
-        
+
         return decrypted_data.getvalue()
-        
+
     except Exception as e:
         error_logger.error(f"Error decrypting file with DES: {str(e)}")
         raise
+
 
 def decrypt_rc4_file_in_chunks(file_oid, key, file_size):
     try:
         ensure_log_header()
         start_time = time.time()
-        
+
         decrypted_data = io.BytesIO()
         cipher = ARC4.new(key)
-        
+
         with large_object_cursor() as cursor:
-            lo = connection.lobject(file_oid, mode='rb')
-            
+            lo = connection.lobject(file_oid, mode="rb")
+
             # Read and decrypt in chunks
             while True:
                 chunk = lo.read(1024 * 1024)  # 1MB chunks
@@ -264,21 +291,22 @@ def decrypt_rc4_file_in_chunks(file_oid, key, file_size):
                     break
                 decrypted_chunk = cipher.decrypt(chunk)
                 decrypted_data.write(decrypted_chunk)
-            
+
             lo.close()
-        
+
         end_time = time.time()
         time_taken = end_time - start_time
         logging.info(f"RC4 decryption took {time_taken:.4f} seconds")
-        
-        with open('performance.log', 'a') as perf_log:
+
+        with open("performance.log", "a") as perf_log:
             perf_log.write(f"Decrypt,RC4,{file_oid},{file_size},{time_taken:.4f}\n")
-        
+
         return decrypted_data.getvalue()
-        
+
     except Exception as e:
         error_logger.error(f"Error decrypting file with RC4: {str(e)}")
         raise
+
 
 # Add these functions after the existing user key encryption functions
 def generate_user_keypair():
@@ -288,26 +316,29 @@ def generate_user_keypair():
     public_key = key.publickey().export_key()
     return public_key, private_key
 
+
 def encrypt_private_key(private_key, user_key):
     """Encrypt user's private key with their symmetric key"""
     cipher = AES.new(user_key, AES.MODE_EAX)
     nonce = cipher.nonce
     encrypted_data = cipher.encrypt(private_key)
-    return base64.b64encode(nonce + encrypted_data).decode('utf-8')
+    return base64.b64encode(nonce + encrypted_data).decode("utf-8")
+
 
 def decrypt_private_key(encrypted_private_key, user_key):
     """Decrypt user's private key with their symmetric key"""
-    encrypted_data = base64.b64decode(encrypted_private_key.encode('utf-8'))
+    encrypted_data = base64.b64decode(encrypted_private_key.encode("utf-8"))
     nonce = encrypted_data[:16]
     cipher = AES.new(user_key, AES.MODE_EAX, nonce=nonce)
     return cipher.decrypt(encrypted_data[16:])
+
 
 def encrypt_sharing_key(sharing_key, public_key):
     """Encrypt the sharing key with recipient's public key"""
     recipient_key = RSA.import_key(public_key)
     cipher = PKCS1_OAEP.new(recipient_key)
     encrypted_key = cipher.encrypt(sharing_key)
-    return base64.b64encode(encrypted_key).decode('utf-8')
+    return base64.b64encode(encrypted_key).decode("utf-8")
 
 
 @app.route("/dashboard")
@@ -317,6 +348,7 @@ def dashboard():
         return redirect(url_for("home"))
     user = User.query.get(session["user_id"])
     return render_template("dashboard.html")
+
 
 # Routes for register, login, encrypt, and decrypt functionalities
 @app.route("/register", methods=["GET", "POST"])
@@ -334,13 +366,15 @@ def register():
         # Generate user's encryption key and keypair
         user_key = get_random_bytes(16)
         encrypted_user_key = encrypt_user_key(user_key, MASTER_KEY)
-        
+
         # Generate RSA keypair
         public_key, private_key = generate_user_keypair()
         encrypted_private_key = encrypt_private_key(private_key, user_key)
-        
+
         # Buat entitas User dan simpan ke database untuk mendapatkan user_id
-        new_user = User(username=username, email=email, encryption_key=encrypted_user_key)
+        new_user = User(
+            username=username, email=email, encryption_key=encrypted_user_key
+        )
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()  # Commit untuk memastikan user_id tersedia
@@ -348,35 +382,40 @@ def register():
         # Setelah user_id tersedia, buat entitas UserKeys
         user_keys = UserKeys(
             user_id=new_user.id,  # Gunakan new_user.id yang sudah terisi
-            public_key=public_key.decode('utf-8'),
-            private_key=encrypted_private_key
+            public_key=public_key.decode("utf-8"),
+            private_key=encrypted_private_key,
         )
 
         db.session.add(user_keys)
         db.session.commit()  # Commit lagi setelah menambahkan UserKeys
-        
+
         flash("Account created successfully", "success")
         return redirect(url_for("login"))
 
     return render_template("register.html")
 
+
 @app.route("/choose_user")
 def choose_user():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    
+
     requester_id = session["user_id"]
 
     # Ambil semua pengguna yang memiliki permintaan akses 'approved' untuk user yang sedang login
     approved_requests = ShareRequest.query.filter_by(
-        requester_id=requester_id,
-        status='approved'
+        requester_id=requester_id, status="approved"
     ).all()
 
     # Dapatkan daftar unique user (owner) berdasarkan permintaan yang disetujui
-    owners = {request.owner for request in approved_requests if request.expiry_date >= datetime.utcnow()}
-    
+    owners = {
+        request.owner
+        for request in approved_requests
+        if request.expiry_date >= datetime.utcnow()
+    }
+
     return render_template("choose_user.html", owners=owners)
+
 
 @app.route("/request_access", methods=["GET", "POST"])
 @app.route("/request_access/<int:owner_id>", methods=["GET", "POST"])
@@ -392,7 +431,9 @@ def request_access(owner_id=None):
         return render_template("request_access.html")
 
     # Tangani metode POST untuk membuat permintaan akses
-    owner_id = owner_id or request.form.get("owner_id")  # Dapatkan owner_id dari URL atau form
+    owner_id = owner_id or request.form.get(
+        "owner_id"
+    )  # Dapatkan owner_id dari URL atau form
 
     # Validasi jika owner_id tidak diisi atau jika pengguna meminta akses ke data mereka sendiri
     if not owner_id or int(owner_id) == requester_id:
@@ -401,9 +442,7 @@ def request_access(owner_id=None):
 
     # Cek apakah permintaan sudah ada
     existing_request = ShareRequest.query.filter_by(
-        requester_id=requester_id,
-        owner_id=owner_id,
-        status='pending'
+        requester_id=requester_id, owner_id=owner_id, status="pending"
     ).first()
 
     if existing_request:
@@ -415,41 +454,45 @@ def request_access(owner_id=None):
         requester_id=requester_id,
         owner_id=owner_id,
         request_date=datetime.utcnow(),
-        expiry_date=datetime.utcnow() + timedelta(days=7)  # Validitas 7 hari
+        expiry_date=datetime.utcnow() + timedelta(days=7),  # Validitas 7 hari
     )
-    
+
     db.session.add(share_request)
     db.session.commit()
-    
+
     flash("Access request sent successfully.", "success")
     return redirect(url_for("dashboard"))
+
 
 @app.route("/manage_requests")
 def manage_requests():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    
+
     user_id = session["user_id"]
-    received_requests = ShareRequest.query.filter_by(owner_id=user_id, status='pending').all()
+    received_requests = ShareRequest.query.filter_by(
+        owner_id=user_id, status="pending"
+    ).all()
     sent_requests = ShareRequest.query.filter_by(requester_id=user_id).all()
-    
+
     return render_template(
         "manage_requests.html",
         received_requests=received_requests,
-        sent_requests=sent_requests
+        sent_requests=sent_requests,
     )
+
 
 @app.route("/approve_request/<int:request_id>", methods=["POST"])
 def approve_request(request_id):
     if "user_id" not in session:
         return redirect(url_for("login"))
-    
+
     share_request = ShareRequest.query.get_or_404(request_id)
-    
+
     if share_request.owner_id != session["user_id"]:
         flash("Unauthorized action", "danger")
         return redirect(url_for("manage_requests"))
-    
+
     try:
         # Mendapatkan owner key yang didekripsi
         owner = User.query.get(session["user_id"])
@@ -457,20 +500,25 @@ def approve_request(request_id):
         logging.info(f"Owner Key after decryption: {owner_key}")
 
         # Enkripsi owner key dengan public key penerima
-        requester_keys = UserKeys.query.filter_by(user_id=share_request.requester_id).first()
+        requester_keys = UserKeys.query.filter_by(
+            user_id=share_request.requester_id
+        ).first()
         encrypted_owner_key = encrypt_sharing_key(owner_key, requester_keys.public_key)
-        logging.info(f"Owner Key after re-encryption with requester's public key: {encrypted_owner_key}")
-        
+        logging.info(
+            f"Owner Key after re-encryption with requester's public key: {encrypted_owner_key}"
+        )
+
         # Simpan key yang telah terenkripsi di permintaan
-        share_request.status = 'approved'
+        share_request.status = "approved"
         share_request.encrypted_key = encrypted_owner_key
-        
+
         db.session.commit()
         flash("Access request approved and key shared.", "success")
     except Exception as e:
         flash(f"Error processing request: {str(e)}", "danger")
-    
+
     return redirect(url_for("manage_requests"))
+
 
 @app.route("/reject_request/<int:request_id>", methods=["POST"])
 def reject_request(request_id):
@@ -483,9 +531,9 @@ def reject_request(request_id):
         flash("Unauthorized action", "danger")
         return redirect(url_for("manage_requests"))
 
-    share_request.status = 'rejected'
+    share_request.status = "rejected"
     db.session.commit()
-    
+
     flash("Request rejected.", "info")
     return redirect(url_for("manage_requests"))
 
@@ -495,32 +543,33 @@ def shared_files(owner_id):
     # Pastikan user telah login
     if "user_id" not in session:
         return redirect(url_for("login"))
-    
+
     requester_id = session["user_id"]
 
     # Verifikasi apakah pengguna memiliki akses 'approved' untuk file owner yang diminta
     share_request = ShareRequest.query.filter_by(
-        requester_id=requester_id,
-        owner_id=owner_id,
-        status='approved'
+        requester_id=requester_id, owner_id=owner_id, status="approved"
     ).first()
-    
+
     if not share_request or share_request.expiry_date < datetime.utcnow():
-        flash("You don't have access to these files or your access has expired.", "danger")
+        flash(
+            "You don't have access to these files or your access has expired.", "danger"
+        )
         return redirect(url_for("dashboard"))
-    
+
     # Ambil daftar file milik owner
     aes_files = AesFile.query.filter_by(user_id=owner_id).all()
     des_files = DesFile.query.filter_by(user_id=owner_id).all()
     rc4_files = Rc4File.query.filter_by(user_id=owner_id).all()
-    
+
     return render_template(
         "shared_files.html",
         owner_id=owner_id,
         aes_files=aes_files,
         des_files=des_files,
-        rc4_files=rc4_files
+        rc4_files=rc4_files,
     )
+
 
 @app.route("/download_file/<int:file_id>/<encryption_method>/<int:owner_id>")
 def download_file(file_id, encryption_method, owner_id):
@@ -531,13 +580,13 @@ def download_file(file_id, encryption_method, owner_id):
 
     requester_id = session["user_id"]
     share_request = ShareRequest.query.filter_by(
-        requester_id=requester_id,
-        owner_id=owner_id,
-        status='approved'
+        requester_id=requester_id, owner_id=owner_id, status="approved"
     ).first()
 
     if not share_request or share_request.expiry_date < datetime.utcnow():
-        flash("You don't have access to this file or your access has expired.", "danger")
+        flash(
+            "You don't have access to this file or your access has expired.", "danger"
+        )
         return redirect(url_for("dashboard"))
 
     try:
@@ -545,9 +594,11 @@ def download_file(file_id, encryption_method, owner_id):
         requester = User.query.get(requester_id)
         requester_key = decrypt_user_key(requester.encryption_key, MASTER_KEY)
         user_keys = UserKeys.query.filter_by(user_id=requester_id).first()
-        
-        private_key = RSA.import_key(decrypt_private_key(user_keys.private_key, requester_key))
-        
+
+        private_key = RSA.import_key(
+            decrypt_private_key(user_keys.private_key, requester_key)
+        )
+
         # Decrypt sharing key
         cipher_rsa = PKCS1_OAEP.new(private_key)
         owner_key = cipher_rsa.decrypt(base64.b64decode(share_request.encrypted_key))
@@ -556,34 +607,47 @@ def download_file(file_id, encryption_method, owner_id):
         # Pastikan dekripsi file menggunakan key yang benar
         decrypted_data = None
         if encryption_method == "AES":
-            encrypted_file = AesFile.query.filter_by(id=file_id, user_id=owner_id).first()
-            decrypted_data = decrypt_aes_file_in_chunks(encrypted_file.data_oid, owner_key, encrypted_file.file_size)
+            encrypted_file = AesFile.query.filter_by(
+                id=file_id, user_id=owner_id
+            ).first()
+            decrypted_data = decrypt_aes_file_in_chunks(
+                encrypted_file.data_oid, owner_key, encrypted_file.file_size
+            )
         elif encryption_method == "DES":
-            encrypted_file = DesFile.query.filter_by(id=file_id, user_id=owner_id).first()
-            decrypted_data = decrypt_des_file_in_chunks(encrypted_file.data_oid, owner_key, encrypted_file.file_size)
+            encrypted_file = DesFile.query.filter_by(
+                id=file_id, user_id=owner_id
+            ).first()
+            decrypted_data = decrypt_des_file_in_chunks(
+                encrypted_file.data_oid, owner_key, encrypted_file.file_size
+            )
         elif encryption_method == "RC4":
-            encrypted_file = Rc4File.query.filter_by(id=file_id, user_id=owner_id).first()
-            decrypted_data = decrypt_rc4_file_in_chunks(encrypted_file.data_oid, owner_key, encrypted_file.file_size)
-        
+            encrypted_file = Rc4File.query.filter_by(
+                id=file_id, user_id=owner_id
+            ).first()
+            decrypted_data = decrypt_rc4_file_in_chunks(
+                encrypted_file.data_oid, owner_key, encrypted_file.file_size
+            )
+
         if not encrypted_file:
             flash("File not found", "danger")
             return redirect(url_for("shared_files", owner_id=owner_id))
-            
+
         return send_file(
             io.BytesIO(decrypted_data),
             download_name=encrypted_file.filename,
             as_attachment=True,
-            mimetype=encrypted_file.filetype
+            mimetype=encrypted_file.filetype,
         )
     except Exception as e:
         flash(f"Error decrypting file: {str(e)}", "danger")
         logging.error(f"File decryption error: {str(e)}")
         return redirect(url_for("shared_files", owner_id=owner_id))
-        
+
     except Exception as e:
         flash(f"Error decrypting file: {str(e)}", "danger")
         logging.error(f"File decryption error: {str(e)}")
         return redirect(url_for("shared_files", owner_id=owner_id))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -596,17 +660,18 @@ def login():
         if user and user.check_password(password):
             session["user_id"] = user.id
             session.permanent = True
-            
+
             # Dekripsi kunci pengguna (user_key) menggunakan MASTER_KEY dan simpan di sesi
             user_key = decrypt_user_key(user.encryption_key, MASTER_KEY)
             session["user_key"] = user_key  # Simpan user_key di sesi
-            
+
             flash("Login successful", "success")
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid email or password", "danger")
             return redirect(url_for("login"))
     return render_template("login.html")
+
 
 @app.route("/encrypt", methods=["GET", "POST"])
 def encrypt():
@@ -635,20 +700,38 @@ def encrypt():
             file.seek(0)
 
             with large_object_cursor() as cursor:
-                lo_oid = connection.lobject(0, 'wb').oid
-                lo = connection.lobject(lo_oid, mode='wb')
+                lo_oid = connection.lobject(0, "wb").oid
+                lo = connection.lobject(lo_oid, mode="wb")
                 lo.write(file.read())
                 lo.close()
 
             if encryption_method == "AES":
                 encrypted_oid = encrypt_aes_file_in_chunks(lo_oid, user_key, file_size)
-                encrypted_file = AesFile(user_id=user_id, filename=file.filename, filetype=file.content_type, data_oid=encrypted_oid, file_size=file_size)
+                encrypted_file = AesFile(
+                    user_id=user_id,
+                    filename=file.filename,
+                    filetype=file.content_type,
+                    data_oid=encrypted_oid,
+                    file_size=file_size,
+                )
             elif encryption_method == "DES":
                 encrypted_oid = encrypt_des_file_in_chunks(lo_oid, user_key, file_size)
-                encrypted_file = DesFile(user_id=user_id, filename=file.filename, filetype=file.content_type, data_oid=encrypted_oid, file_size=file_size)
+                encrypted_file = DesFile(
+                    user_id=user_id,
+                    filename=file.filename,
+                    filetype=file.content_type,
+                    data_oid=encrypted_oid,
+                    file_size=file_size,
+                )
             elif encryption_method == "RC4":
                 encrypted_oid = encrypt_rc4_file_in_chunks(lo_oid, user_key, file_size)
-                encrypted_file = Rc4File(user_id=user_id, filename=file.filename, filetype=file.content_type, data_oid=encrypted_oid, file_size=file_size)
+                encrypted_file = Rc4File(
+                    user_id=user_id,
+                    filename=file.filename,
+                    filetype=file.content_type,
+                    data_oid=encrypted_oid,
+                    file_size=file_size,
+                )
 
             db.session.add(encrypted_file)
             db.session.commit()
@@ -662,8 +745,8 @@ def encrypt():
 
     return render_template("encrypt.html")
 
-# Perbaikan untuk fungsi decrypt di route /decrypt
 
+# Perbaikan untuk fungsi decrypt di route /decrypt
 @app.route("/decrypt", methods=["POST", "GET"])
 def decrypt():
     if "user_id" not in session:
@@ -671,15 +754,13 @@ def decrypt():
 
     user_id = session.get("user_id")
     owner_id = request.args.get("owner_id", user_id, type=int)
-    
+
     # If accessing another user's files
     if owner_id != user_id:
         share_request = ShareRequest.query.filter_by(
-            requester_id=user_id,
-            owner_id=owner_id,
-            status='approved'
+            requester_id=user_id, owner_id=owner_id, status="approved"
         ).first()
-        
+
         if not share_request or share_request.expiry_date < datetime.utcnow():
             flash("You don't have access to these files", "danger")
             return redirect(url_for("dashboard"))
@@ -692,7 +773,7 @@ def decrypt():
         try:
             file_id = request.form.get("file_id")
             encryption_method = request.form.get("encryption")
-            
+
             # Get appropriate user key
             if owner_id == user_id:
                 user = User.query.get(user_id)
@@ -703,26 +784,30 @@ def decrypt():
                 requester_key = decrypt_user_key(requester.encryption_key, MASTER_KEY)
                 user_keys = UserKeys.query.filter_by(user_id=user_id).first()
                 private_key = decrypt_private_key(user_keys.private_key, requester_key)
-                
+
                 # Decrypt the sharing key
                 rsa_key = RSA.import_key(private_key)
                 cipher = PKCS1_OAEP.new(rsa_key)
-                encrypted_sharing_key = base64.b64decode(share_request.encrypted_key.encode('utf-8'))
+                encrypted_sharing_key = base64.b64decode(
+                    share_request.encrypted_key.encode("utf-8")
+                )
                 user_key = cipher.decrypt(encrypted_sharing_key)
 
             # Read and decrypt file based on encryption method
             decrypted_data = None
             filename = None
             filetype = None
-            
+
             if encryption_method == "AES":
-                encrypted_file = AesFile.query.filter_by(id=file_id, user_id=owner_id).first()
+                encrypted_file = AesFile.query.filter_by(
+                    id=file_id, user_id=owner_id
+                ).first()
                 if encrypted_file:
                     with large_object_cursor() as cursor:
-                        lo = connection.lobject(encrypted_file.data_oid, mode='rb')
+                        lo = connection.lobject(encrypted_file.data_oid, mode="rb")
                         encrypted_data = lo.read()
                         lo.close()
-                        
+
                         # Decrypt the data
                         nonce = encrypted_data[:16]
                         ciphertext = encrypted_data[16:]
@@ -730,15 +815,17 @@ def decrypt():
                         decrypted_data = cipher.decrypt(ciphertext)
                         filename = encrypted_file.filename
                         filetype = encrypted_file.filetype
-                        
+
             elif encryption_method == "DES":
-                encrypted_file = DesFile.query.filter_by(id=file_id, user_id=owner_id).first()
+                encrypted_file = DesFile.query.filter_by(
+                    id=file_id, user_id=owner_id
+                ).first()
                 if encrypted_file:
                     with large_object_cursor() as cursor:
-                        lo = connection.lobject(encrypted_file.data_oid, mode='rb')
+                        lo = connection.lobject(encrypted_file.data_oid, mode="rb")
                         encrypted_data = lo.read()
                         lo.close()
-                        
+
                         # Decrypt the data
                         iv = encrypted_data[:8]
                         ciphertext = encrypted_data[8:]
@@ -746,15 +833,17 @@ def decrypt():
                         decrypted_data = cipher.decrypt(ciphertext)
                         filename = encrypted_file.filename
                         filetype = encrypted_file.filetype
-                        
+
             elif encryption_method == "RC4":
-                encrypted_file = Rc4File.query.filter_by(id=file_id, user_id=owner_id).first()
+                encrypted_file = Rc4File.query.filter_by(
+                    id=file_id, user_id=owner_id
+                ).first()
                 if encrypted_file:
                     with large_object_cursor() as cursor:
-                        lo = connection.lobject(encrypted_file.data_oid, mode='rb')
+                        lo = connection.lobject(encrypted_file.data_oid, mode="rb")
                         encrypted_data = lo.read()
                         lo.close()
-                        
+
                         # Decrypt the data
                         cipher = ARC4.new(user_key)
                         decrypted_data = cipher.decrypt(encrypted_data)
@@ -769,7 +858,7 @@ def decrypt():
                 io.BytesIO(decrypted_data),
                 download_name=filename,
                 as_attachment=True,
-                mimetype=filetype
+                mimetype=filetype,
             )
 
         except Exception as e:
@@ -782,13 +871,15 @@ def decrypt():
         aes_files=aes_files,
         rc4_files=rc4_files,
         des_files=des_files,
-        owner_id=owner_id
+        owner_id=owner_id,
     )
+
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("home"))
+
 
 if __name__ == "__main__":
     if not os.path.exists(app.config["UPLOAD_FOLDER"]):
