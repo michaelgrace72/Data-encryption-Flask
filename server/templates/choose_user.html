@@ -1,21 +1,38 @@
 <!-- templates/choose_user.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Choose User to Access Shared Files</title>
-</head>
-<body>
-    <h2>Select User to Access Shared Files</h2>
-    <ul>
-        {% for owner in owners %}
-        <li>
-            User ID: {{ owner.id }} - {{ owner.username }}
-            <a href="{{ url_for('shared_files', owner_id=owner.id) }}">Access Files</a>
-        </li>
-        {% endfor %}
-    </ul>
+{% extends "app.html" %} {% block content %}
+<h1 class="text-3xl font-bold mb-4">Shared Files</h1>
+<div class="p-4">
+  <div class="mb-4 relative overflow-x-auto shadow-md sm:rounded-lg">
+<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+    <tr>
+        <th scope="col" class="px-6 py-3">
+          Username
+        </th>
+        <th scope="col" class="px-6 py-3">
+          User ID 
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Link 
+        </th>
+    </tr>
+</thead>
+  <tbody>
+    {% for owner in owners %}
+      <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+        <th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ owner.username }}</td>
+        <td class="px-6 py-4">{{ owner.id }}</td>
+        <td class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+        <a href="{{ url_for('shared_files', owner_id=owner.id) }}">Access Files</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+  </div>
 
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
-</body>
-</html>
+<a href="{{ url_for('dashboard') }}">
+  <button class="bg-gray-500 text-white px-4 py-2 rounded">Back to Dashboard</button>
+</a>
+</div>
+{% endblock %}
