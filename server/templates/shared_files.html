@@ -64,7 +64,6 @@
         </thead>
         <tbody>
           {% for file in rc4_files %}
-          <form action="{{ url_for('decrypt') }}" method="POST" class="inline">
             <input type="hidden" name="file_id" value="{{ file.id }}" />
             <input type="hidden" name="encryption" value="RC4" />
             <tr
@@ -85,7 +84,6 @@
                   href="{{ url_for('download_file', file_id=file.id, encryption_method='RC4', owner_id=owner_id) }}"
                 >
                   <button
-                    type="submit"
                     class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                   >
                     Download
@@ -93,7 +91,6 @@
                 </a>
               </td>
             </tr>
-          </form>
           {% endfor %}
         </tbody>
       </table>
@@ -115,7 +112,6 @@
       </thead>
       <tbody>
         {% for file in des_files %}
-        <form action="{{ url_for('decrypt') }}" method="POST" class="inline">
           <input type="hidden" name="file_id" value="{{ file.id }}" />
           <input type="hidden" name="encryption" value="DES" />
           <tr
@@ -141,7 +137,6 @@
               </a>
             </td>
           </tr>
-        </form>
         {% endfor %}
       </tbody>
     </table>
