@@ -72,6 +72,20 @@ connection = engine.raw_connection()
 app.config["UPLOAD_FOLDER"] = "uploads/"
 
 
+@app.context_processor
+def inject_user():
+    if (
+        "user_id" in session
+        and "user_key" in session
+        and session["user_id"] is not None
+        and session["user_key"] is not None
+    ):
+        user = User.query.get(session["user_id"]).username
+    else:
+        user = None
+    return dict(username=user)
+
+
 @contextmanager
 def large_object_cursor():
     with connection.cursor() as cursor:
