@@ -1,70 +1,98 @@
 {% extends "app.html"%}
 
 {% block content %}
-<!-- <div class="container mx-auto p-4"> -->
-<!--         <h1 class="text-3xl font-bold mb-4">Website Brief: Encrypted File Upload and Download</h1> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Overview</h2> -->
-<!--         <p class="mb-4">Our website provides a secure platform for users to upload and download files with encryption. We support multiple encryption algorithms to ensure data security and privacy.</p> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Features</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>File Upload:</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Users can upload files through a simple and intuitive interface.</li> -->
-<!--                     <li>Files are encrypted using one of the supported encryption algorithms before being stored on the server.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>File Download:</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Users can download their previously uploaded files.</li> -->
-<!--                     <li>Files are decrypted on-the-fly during the download process.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Supported Encryption Algorithms</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>AES (Advanced Encryption Standard):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Strong symmetric encryption standard.</li> -->
-<!--                     <li>Suitable for securing sensitive data.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>RC4 (Rivest Cipher 4):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Stream cipher known for its simplicity and speed.</li> -->
-<!--                     <li>Suitable for applications where speed is critical.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>DES (Data Encryption Standard):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Symmetric-key algorithm for the encryption of digital data.</li> -->
-<!--                     <li>Suitable for legacy systems and applications.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Security Measures</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Encryption Keys:</strong> Each file is encrypted with a unique key to ensure maximum security.</li> -->
-<!--             <li class="mb-2"><strong>Secure Storage:</strong> Encrypted files are stored securely on the server.</li> -->
-<!--             <li class="mb-2"><strong>User Authentication:</strong> Only authenticated users can upload and download files.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">User Interface</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Upload Page:</strong> Users can select files to upload and choose the encryption algorithm.</li> -->
-<!--             <li class="mb-2"><strong>Download Page:</strong> Users can view a list of their uploaded files and download them.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Technical Stack</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Backend:</strong> Flask framework for handling file uploads, encryption, and downloads.</li> -->
-<!--             <li class="mb-2"><strong>Frontend:</strong> HTML, CSS, and JavaScript for a responsive and user-friendly interface.</li> -->
-<!--             <li class="mb-2"><strong>Encryption Libraries:</strong> Python libraries such as <code>pycryptodome</code> for implementing encryption algorithms.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <p class="mb-4">This brief outlines the core functionality and features of our website, ensuring a secure and user-friendly experience for encrypted file management.</p> -->
-<!--         </div> -->
+<div class="container mx-auto p-4">
+
+    <!-- Hero Section -->
+    <section class="bg-blue-600 text-white py-10">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl font-bold mb-2">Welcome to Our Website</h1>
+            <p class="text-xl">We've worked several features for our Information Security Assignment!</p>
+        </div>
+    </section>
+
+
+<section class="bg-blue-600 text-white py-5">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-bold mb-8">Meet Our Team</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Team Member 1 -->
+            <div class="bg-white text-blue-600 p-6 rounded-lg shadow-lg">
+                <img src="https://avatars.githubusercontent.com/u/114130032?v=4" alt="Team Member 1" class="w-24 h-24 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-semibold">Mikha Gracia Sugiono</h3>
+            </div>
+            <!-- Team Member 2 -->
+            <div class="bg-white text-blue-600 p-6 rounded-lg shadow-lg">
+                <img src="https://avatars.githubusercontent.com/u/89150137?v=4" alt="Team Member 2" class="w-24 h-24 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-semibold">Azarel Grahandito Adi</h3>
+            </div>
+            <!-- Team Member 3 -->
+            <div class="bg-white text-blue-600 p-6 rounded-lg shadow-lg">
+                <img src="https://avatars.githubusercontent.com/u/136097346?v=4" alt="Team Member 3" class="w-24 h-24 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-semibold">Alvin Vincent Oswald Reba</h3>
+            </div>
+        </div>
+    </div>
+</section>
+    <!-- Features Section -->
+    <section class="py-10">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Assignment 1: Encrypt and Upload</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-2">Upload and Encrypt Files</h3>
+                    <p class="text-gray-700 mb-2">
+                      Upload files and encrypt them using AES, RC4, and DES encryption algorithms.
+                    </p>
+                    <a href="{{ url_for('encrypt') }}">
+                      <button class="bg-blue-500 text-white px-4 py-2 rounded">Go to Encryption</button>
+                    </a>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-2">Download Encrypted Files</h3>
+                    <p class="text-gray-700 mb-2">
+                      Download encrypted files and decrypt them using AES, RC4, and DES decryption algorithms.
+                    </p>
+                    <a href="{{ url_for('decrypt') }}">
+                      <button class="bg-blue-500 text-white px-4 py-2 rounded">Go to Decryption</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-10">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Assignment 2: Key Exchange</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-2">Manage Incoming Request</h3>
+                    <p class="text-gray-700 mb-2">
+                      Manage incoming requests from other users to access your files.
+                    </p>
+                    <a href="{{ url_for('manage_requests') }}">
+                      <button class="bg-blue-500 text-white px-4 py-2 rounded">Go to Incoming Request</button>
+                    </a>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-2">Shared Files</h3>
+                    <p class="text-gray-700 mb-2">
+                      Access files shared by other users.
+                    </p>
+                    <a href="{{ url_for('choose_user') }}">
+                      <button class="bg-blue-500 text-white px-4 py-2 rounded">Go to Shared Files</button>
+                    </a>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-2">Request Access</h3>
+                    <p class="text-gray-700 mb-2">
+                      Request access to other user's files with other said user's ID.
+                    </p>
+                    <a href="{{ url_for('request_access') }}">
+                      <button class="bg-blue-500 text-white px-4 py-2 rounded">Go to Request Access</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 {% endblock %}
