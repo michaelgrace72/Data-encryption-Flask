@@ -1,0 +1,69 @@
+<!-- templates/manage_requests.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Requests</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h2>Manage Requests</h2>
+
+    <h3>Received Requests</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Requester</th>
+                <th>Status</th>
+                <th>Request Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in received_requests %}
+            <tr>
+                <td>{{ request.requester.username }}</td>
+                <td>{{ request.status }}</td>
+                <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                    {% if request.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('approve_request', request_id=request.id) }}" style="display:inline;">
+                            <button type="submit">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_request', request_id=request.id) }}" style="display:inline;">
+                            <button type="submit">Reject</button>
+                        </form>
+                    {% else %}
+                        {{ request.status.capitalize() }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Sent Requests</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Requested User</th>
+                <th>Status</th>
+                <th>Request Date</th>
+                <th>Expiry Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in sent_requests %}
+            <tr>
+                <td>{{ request.owner.username }}</td>
+                <td>{{ request.status }}</td>
+                <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ request.expiry_date.strftime('%Y-%m-%d %H:%M:%S') if request.expiry_date else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

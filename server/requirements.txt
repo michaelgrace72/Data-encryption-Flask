@@ -1,8 +1,8 @@
-flask==3.0.3
-psycopg2==2.9.9
-wekzeug==3.0.4
-flask-jwt-extended==2.9.0
+flask
+psycopg2
+werkzeug
+flask-jwt-extended
 python-dotenv
-flask-WTF==3.1.2
+flask-WTF
 Flask-SQLAlchemy
 pycryptodome

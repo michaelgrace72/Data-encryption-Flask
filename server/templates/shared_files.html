@@ -1,0 +1,73 @@
+<!-- templates/shared_files.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shared Files</title>
+</head>
+<body>
+    <h2>Files Shared by User ID {{ owner_id }}</h2>
+
+    <h3>AES Files</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Filename</th>
+                <th>File Size</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in aes_files %}
+            <tr>
+                <td>{{ file.filename }}</td>
+                <td>{{ file.file_size }} bytes</td>
+                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='AES', owner_id=owner_id) }}">Download</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>DES Files</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Filename</th>
+                <th>File Size</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in des_files %}
+            <tr>
+                <td>{{ file.filename }}</td>
+                <td>{{ file.file_size }} bytes</td>
+                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='DES', owner_id=owner_id) }}">Download</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>RC4 Files</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Filename</th>
+                <th>File Size</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in rc4_files %}
+            <tr>
+                <td>{{ file.filename }}</td>
+                <td>{{ file.file_size }} bytes</td>
+                <td><a href="{{ url_for('download_file', file_id=file.id, encryption_method='RC4', owner_id=owner_id) }}">Download</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('choose_user') }}">Back to Choose User</a>
+</body>
+</html>

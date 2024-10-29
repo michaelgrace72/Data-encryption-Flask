@@ -1,0 +1,21 @@
+<!-- templates/choose_user.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Choose User to Access Shared Files</title>
+</head>
+<body>
+    <h2>Select User to Access Shared Files</h2>
+    <ul>
+        {% for owner in owners %}
+        <li>
+            User ID: {{ owner.id }} - {{ owner.username }}
+            <a href="{{ url_for('shared_files', owner_id=owner.id) }}">Access Files</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

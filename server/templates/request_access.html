@@ -1,0 +1,20 @@
+<!-- templates/request_access.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Access</title>
+</head>
+<body>
+    <h2>Request Access to User Data</h2>
+
+    <!-- Form untuk memasukkan user ID pengguna yang ingin diminta aksesnya -->
+    <form action="{{ url_for('request_access') }}" method="POST">
+        <label for="owner_id">Enter the User ID to request access:</label>
+        <input type="number" id="owner_id" name="owner_id" required>
+        <button type="submit">Request Access</button>
+    </form>
+
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>
