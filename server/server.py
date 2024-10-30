@@ -319,6 +319,11 @@ def log_activity(user_id, activity_type, details):
 def inject_base_url():
     return {"base_url": url_for("dashboard")}
 
+@app.before_request
+def load_logged_in_user():
+    """Load user information into the global variable `g`"""
+    g.username = session.get("username")
+
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
