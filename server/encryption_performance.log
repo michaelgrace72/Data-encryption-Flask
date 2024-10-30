@@ -1,0 +1,41 @@
+2024-10-29 19:15:32,345 - Error: Directory migrations already exists and is not empty
+2024-10-29 19:20:53,393 - RC4 encryption took 0.2099 seconds
+2024-10-29 19:32:39,066 - Owner Key after decryption: b'\xce\x86[\xfb\x02\xdaJnvg\x95\xff\xf9\xb8\xd2\x92'
+2024-10-29 19:32:39,098 - Owner Key after re-encryption with requester's public key: DXZU7PoUErljlzraQipIvn8+3/vT1xvVCb3+R+L2x4uL9qhZ9SfRjCvBbHAitlGGFnwWSKfTK0IZerefdyY3VZzuLbvZkNw3oBTg6Vl9YuMuYvnGlflDaHevzHEKEZH8gTszkHr7nhRRmeO2EOqzqla+Dfzx+YUbwFtGS/HqDtJ8SwDaZCwka31vbxidt7K9ZqmtXje3ClpzPGYDNwkdRRsU5QYlxBtJUefkhzDUAqhiEG+X44yyrqi6kT54Whd3Nv/WGHA50zBXf/gDsfTAF5OhGDn3PQSKI1HN+kk9SnO9tfu4PBJPjtRPOMtXGHPD0/HsJJ4dhjBp5mlNLv/qaQ==
+2024-10-29 19:32:59,270 - Starting download file process
+2024-10-29 19:32:59,408 - Decrypted owner key used for file decryption: b'\xce\x86[\xfb\x02\xdaJnvg\x95\xff\xf9\xb8\xd2\x92'
+2024-10-29 19:32:59,498 - RC4 decryption took 0.0864 seconds
+2024-10-30 04:52:05,154 - Error: Directory migrations already exists and is not empty
+2024-10-30 04:56:37,247 - Error: Directory migrations already exists and is not empty
+2024-10-30 05:15:14,654 - Owner Key after decryption: b'\xce\x86[\xfb\x02\xdaJnvg\x95\xff\xf9\xb8\xd2\x92'
+2024-10-30 05:15:14,684 - Owner Key after re-encryption with requester's public key: Trs246UBr2Mu4IqCWxXB0RbDl4bzA7cS3E96U57R2WIBfW9SP3rzHTAJfV2aiixg/LhVFXVIUneyJAlUQWiwMei0Wywfyv6taVYqOQmPOO7BSTZTr4u/5/iQGGleHgqt2bx3sjMtTstuYck0cDCaIvmYvuaZ/GFVZR0R5N9PPoLonR95q5SJszGQPbDiRXywFpelGdU/EawVFU7q4HmOLoxjQs5esmqPup0xgsaRR0mu5TWOl3Pax8GEZrGxuU6v0k3ra2d2S1FpItfxHCxcAgdjA6OeKHOXJ6wCXKWQK6TL+EKN0eI1vO4tTezPdcuYhxceg/R43fWLzDm3E0sF/w==
+2024-10-30 05:19:33,590 - Owner Key after decryption: b'\xce\x86[\xfb\x02\xdaJnvg\x95\xff\xf9\xb8\xd2\x92'
+2024-10-30 05:19:33,595 - Owner Key after re-encryption with requester's public key: LYkoEARe3ZLhcGjlZFbsiA3R5ZMhJC7V8WzAS81ASGEz55Z/VK5apOkaBGNIQKUq0Iq4aZ1fGS6DoP2j7NCBxFYLOPQWXb/aNUHOqetcA6suYPtMgVPv/DNv4VDdmtFYuRH4G0oZRj9Bbw+eeeW8YYr1Dz+35u4oppNDuwNG/rRxP/kzKUJF/enQ7pij6hhxOiCYr6PHe8fHbIjEyaemeAb4z2P4GddR2YmcW/zhnyzehA8AqxOeezOSp3Y9HSu3qkBG8txs5Y9wwUUi//irAGQP3wM2QbevMFd/OMNbPYvoFlZ2gB3byrft4dKVpNj7cATWFJHZ2kgVLMn720O7qA==
+2024-10-30 05:25:02,172 - Starting download file process
+2024-10-30 05:27:19,476 - Starting download file process
+2024-10-30 05:28:21,358 - AES encryption took 0.4443 seconds
+2024-10-30 05:28:31,735 - Owner Key after decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 05:28:31,741 - Owner Key after re-encryption with requester's public key: MhVP9kQKVPJDV6pofjzcrmOqwUJKdLFqqqXNGN4mFH9N+EDYvoZhlBU8Kayp+lWB3occOLfWNEsw2GJCRptkJ2P0PpEp/snPo5BKk2a0jna41+6fE9WxunDrGgsDv27/Av1hBcWAGaEaXgjG5SKsPO6QWy+0NdZ2GTQgPyRl7yiDrsZNg1LoxzRj/C7gy1Ajz67TCpE3A7WV40Wkzv+X9STk9ganSbFU1jgZ/pu2XVYgip+1BsXybhKPZ7ZlROIKvsqOi3Gmw+HHCKeTqgP9SKJiGlbXk7VaJe4JPMyznVwtjaf6zuF82n2gm3Tulje+jeHG16bcNLEcyztUE2n5AQ==
+2024-10-30 05:28:44,454 - Starting download file process
+2024-10-30 05:28:44,536 - Decrypted owner key used for file decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 05:28:44,639 - AES decryption took 0.1012 seconds
+2024-10-30 05:34:03,161 - Owner Key after decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 05:34:03,188 - Owner Key after re-encryption with requester's public key: L+jz+tfxXVE4FCv//a6SLDHVKz7Y+UWoJOJWK4o0BmyXKwaC0nK06A7ZqvsuGxzOhhrDMrzYowycyc3hkR7bRv+xtCdtA/QZqwxa11pTicmiSy/PGDdCi5Y1WlIMh+/j8N1fJ4AICbKtp+//slCmZpn0mlta2RW6M3sUTuCw3C9cB9TYFf8HOzw/n3HK6pRWUnSq/koLPlIZkraicGP7DsrvgZudIQ0A0uamllQy30CpBPHV2U9f+SzVyXpK2HfmUw95fJpmsPn59Q2P0P87X9ZFgxi/BmmzIIZaS9ssExbzeDVw34jDRAc+E5PVGbhlQcSJNENC9T2DZxSsyYxgag==
+2024-10-30 06:02:45,579 - Error: Directory migrations already exists and is not empty
+2024-10-30 06:14:57,991 - Starting download file process
+2024-10-30 06:14:58,093 - Decrypted owner key used for file decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 06:14:58,211 - AES decryption took 0.1149 seconds
+2024-10-30 06:15:22,355 - RC4 encryption took 0.0105 seconds
+2024-10-30 06:17:01,752 - DES encryption took 0.2469 seconds
+2024-10-30 06:28:53,098 - Starting download file process
+2024-10-30 06:28:53,192 - Decrypted owner key used for file decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 06:28:53,412 - DES decryption took 0.2127 seconds
+2024-10-30 06:29:26,141 - Owner Key after decryption: b'\x87!\xf4\xcc\xb7.\x0b+\xd0\xf2\x1b\x9d\xf7\xdfN\xe8'
+2024-10-30 06:29:26,147 - Owner Key after re-encryption with requester's public key: zea/4dsirQO+JqKMNVjkoMJaUY80JV9WHvInSSJLtCqSaHpfiOx403H59YYaIt00pGFBg9YrhsUDRoxp9sTweRgE+pKZfy4cbHUORnAT+Fvadna2945ZhxMrniA/M+k7ofdRCOoxh8rkobt7Cer6u36VuKLuVC3qX96GvvYH5q7njxmjtU8d1qC6fULWtbvA7h5quheU2yKcMnduT87937wWYilL/jTFuBY4ZVBSeulWEa4kG/kAgBTe/DKHis773eUyCcQb6wjrSuiIl60gMIz3R0IOsGjh7DtW3tM75iwVMrzsH0myPOUbnx6Hvfq5+bk1OXOz12Vy9DhWEUU9yA==
+2024-10-30 06:48:21,487 - Owner Key after decryption: b'\x87!\xf4\xcc\xb7.\x0b+\xd0\xf2\x1b\x9d\xf7\xdfN\xe8'
+2024-10-30 06:48:21,508 - Owner Key after re-encryption with requester's public key: dsbUfRkDFbBISXRl4Rl15/Y0prXgLBu4K1yVyVqcDTmj3mcRVnrsvSXooFyZgoMMo0yOytuxgg3blyymq+p2sFAftUEv2s4Sp6HUZZa6kIbgY32UMv42zFlviSrsdZKTaNn0zm3Bbc/ibESmNwIwXxDDKCyIqzdjIJlRe5CwBHO27mgBED7InhZjM9NeQgT/FTIGi55zOXdBn8DrNDCB6M1OTxT+dZvOiJg9ZnbzIhVAz89SmUHwmLMztk7RjZF9AdXzLHEnIE9uS5D3EhfdOzpINI/CU9yTXBRI/2+9IjND2jmbHMBVWlSh6pFwOMagbYWvlvqxUODAvJO+2CNYpA==
+2024-10-30 06:51:22,775 - Starting download file process
+2024-10-30 06:51:22,863 - Decrypted owner key used for file decryption: b'\x87!\xf4\xcc\xb7.\x0b+\xd0\xf2\x1b\x9d\xf7\xdfN\xe8'
+2024-10-30 06:51:22,872 - RC4 decryption took 0.0049 seconds
+2024-10-30 06:55:22,048 - Owner Key after decryption: b'>5\xf4\x8e[\xe6f\r\xa8\x99\x0c\xbfD\x86\x8a>'
+2024-10-30 06:55:22,054 - Owner Key after re-encryption with requester's public key: evKF1bTKozGowy0DBW0CJh+hpkEVHl6pN9RP+dHAvDhz0vrGCWW7f+oVclhmT4aYxATm4Ixq+I5l3tGeWCGQh8JcopggzxA2MVO+cNbtc8QZLFNEOmbzMbK8CJTbsIQQbLzTDo9LujAoQgd+c73cvXmmZsffQWpJMwQ3Z3d/czDlYlrZ3n+nZ6U3I2aSXNzQRD4Gz7xAjAbOMxGpQA+0r4CIyVtAJkIKE3oYC/o2ciJCQn46TYx91hPhEwtu5DDsmsNoIepu+UzvHb1nYbGYoSpDRj2Ymk62J+3Qe2VLv1P11rSeh13jcdguNd4Jo2iO1Rsf+dDN9KJ4TJ9x4MiT7w==

@@ -1,0 +1,103 @@
+{% extends "app.html" %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Manage Requests</h1>
+<div class="container mx-auto p-4">
+
+<!-- Tabel Received Requests (Pending) -->
+<h2 class="text-xl font-bold mb-3">Received Requests</h2>
+<div class="relative overflow-x-auto mb-4 shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">Requester</th>
+                <th scope="col" class="px-6 py-3">Status</th>
+                <th scope="col" class="px-6 py-3">Request Date</th>
+                <th scope="col" class="px-6 py-3">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in received_requests %}
+            <tr class="odd:bg-white dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ request.requester.username }}</td>
+                <td class="px-6 py-4">{{ request.status.capitalize() }}</td>
+                <td class="px-6 py-4">{{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td class="px-6 py-4">
+                    <form method="POST" action="{{ url_for('approve_request', request_id=request.id) }}" style="display: inline;">
+                        <button class="text-blue-600 dark:text-blue-500 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="submit">Approve</button>
+                    </form>
+                    |
+                    <form method="POST" action="{{ url_for('reject_request', request_id=request.id) }}" style="display: inline;">
+                        <button class="text-red-600 dark:text-red-500 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" type="submit">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">No pending requests</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Tabel Active Access -->
+<h2 class="text-xl font-bold mb-3">Active Access</h2>
+<div class="relative overflow-x-auto mb-4 shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">Requester</th>
+                <th scope="col" class="px-6 py-3">Status</th>
+                <th scope="col" class="px-6 py-3">Access Expiry</th>
+                <th scope="col" class="px-6 py-3">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in active_access %}
+            <tr class="odd:bg-white dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ request.requester.username }}</td>
+                <td class="px-6 py-4">
+                    {% if request.is_blocked %}
+                        <span class="text-red-600">Blocked</span>
+                    {% else %}
+                        <span class="text-green-600">Active</span>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4">{{ request.access_expiry.strftime('%Y-%m-%d %H:%M:%S') if request.access_expiry else 'N/A' }}</td>
+                <td class="px-6 py-4">
+                    {% if request.is_blocked %}
+                        <form method="POST" action="{{ url_for('unblock_access', request_id=request.id) }}" style="display: inline;">
+                            <button class="text-green-600 dark:text-green-500 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" type="submit">
+                                Unblock
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('block_access', request_id=request.id) }}" style="display: inline;">
+                            <button class="text-red-600 dark:text-red-500 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" type="submit">
+                                Block
+                            </button>
+                        </form>
+                    {% endif %}
+                    |
+                    <!-- Tombol Delete dengan konfirmasi -->
+                    <form method="POST" action="{{ url_for('delete_access', request_id=request.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this access? This action cannot be undone.')">
+                        <button class="text-red-600 dark:text-red-500 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" type="submit">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">No active access</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('dashboard') }}">
+  <button class="bg-gray-500 text-white px-4 py-2 rounded">Back to Dashboard</button>
+</a>
+</div>
+{% endblock %}

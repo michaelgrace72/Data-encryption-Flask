@@ -1,19 +1,16 @@
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 class Config:
-  SECRET_KEY = os.getenv('SECRET_KEY')
-  user = os.getenv('DB_USER')
-  host = os.getenv('DB_HOST')
-  password = os.getenv('DB_PASS')
-  database = os.getenv('DB_NAME')
-  
-  #construct the database URI
-  SQLALCHEMY_DATABASE_URI = f'postgresql://{user}:{password}@{host}/{database}'
-  SQLALCHEMY_Track_MODIFICATIONS = False
-
-  # set session expiration time to 30 minutes
-  PERMANENT_SESSION_LIFETIME = 1800
+    SECRET_KEY = os.getenv('SECRET_KEY') or os.urandom(32)
+    DB_USER = os.getenv('DB_USER', 'alvn')
+    DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', 'alvn12345')
+    DB_NAME = os.getenv('DB_NAME', 'ki')
+    
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+    PERMANENT_SESSION_LIFETIME = 1800  

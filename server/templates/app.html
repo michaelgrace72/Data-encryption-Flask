@@ -11,9 +11,9 @@
     />
   </head>
   <body>
-    <div id="body" class="bg-blue-50 h-screen flex">
+    <div id="body" class="bg-blue-50 flex">
       <nav
-        class="bg-gray-800 w-80 h-screen flex flex-col gap-1 border-r border-slate-100"
+        class="bg-gray-800 w-80 overflow-y-auto h-screen sticky top-0 flex-col gap-1 border-r border-slate-100"
       >
         <div
           class="text-white logo text-xl font-bold text-center my-5 flex items-center justify-center"
@@ -21,19 +21,16 @@
           Information Security Assignment
         </div>
         <div
-          class="user flex items-center justify-center flex-col gap-4 border-b border-emerald-slate-50 py-4"
+          class="flex items-center justify-center flex-col gap-4 border-b border-emerald-slate-50 py-4"
         >
           <img
             class="w-24 rounded-full"
             src="https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png"
           />
           <div class="flex flex-col items-center">
-            <span class="font-semibold text-lg text-emerald-50"
-              >{{ username }}</span
-            >
-            <span class="text-slate-400 text-sm">User</span>
-          </div>
-        </div>
+            <span class="font-semibold text-lg text-emerald-50">
+              {{ g.username or 'Guest' }}
+          </div>          
 
         <ul class="px-6 py-6 space-y-2">
           <li>
@@ -50,7 +47,27 @@
               >Decryption (Download)</a
             >
           </li>
-          
+          <li>
+            <a
+              class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-900 hover:text-white rounded-lg"
+              href="{{ url_for('request_access') }}"
+              >Request Access</a
+            >
+          </li>
+          <li>
+            <a
+              class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-900 hover:text-white rounded-lg"
+              href="{{ url_for('manage_requests') }}"
+              >Manage Incoming Request</a
+            >
+          </li>
+          <li>
+            <a
+              class="block px-4 py-2.5 text-white font-semibold hover:bg-slate-900 hover:text-white rounded-lg"
+              href="{{ url_for('choose_user') }}"
+              >Shared Files</a
+            >
+          </li>
         </ul>
       </nav>
       <div class="right w-full flex flex-col gap-2">
@@ -67,9 +84,9 @@
             >
               <li class="inline-flex items-center">
                 <a
-                  href="dashboard"
-                  class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
-                >
+                href="{{ url_for('dashboard') }}"
+                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
+              >
                   <svg
                     class="w-3 h-3 me-2.5"
                     aria-hidden="true"
@@ -81,33 +98,35 @@
                       d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"
                     />
                   </svg>
-                  Home
+                  Dashboard
                 </a>
               </li>
-              <li>
-                <div class="flex items-center">
-                  <svg
-                    class="rtl:rotate-180 block w-3 h-3 mx-1 text-gray-400"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 6 10"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 9 4-4-4-4"
-                    />
-                  </svg>
-                  <a
-                    href="#"
-                    class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
-                    >{{ current_page }}</a
-                  >
-                </div>
-              </li>
+              <!-- {% for breadcrumb in breadcrumbs %} -->
+              <!-- <li> -->
+              <!--   <div class="flex items-center"> -->
+              <!--     <svg -->
+              <!--       class="rtl:rotate-180 block w-3 h-3 mx-1 text-gray-400" -->
+              <!--       aria-hidden="true" -->
+              <!--       xmlns="http://www.w3.org/2000/svg" -->
+              <!--       fill="none" -->
+              <!--       viewBox="0 0 6 10" -->
+              <!--     > -->
+              <!--       <path -->
+              <!--         stroke="currentColor" -->
+              <!--         stroke-linecap="round" -->
+              <!--         stroke-linejoin="round" -->
+              <!--         stroke-width="2" -->
+              <!--         d="m1 9 4-4-4-4" -->
+              <!--       /> -->
+              <!--     </svg> -->
+              <!--     <a -->
+              <!--       href="{{breadcrumb.url}}" -->
+              <!--       class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white" -->
+              <!--       >{{ breadcrumb.text }}</a -->
+              <!--     > -->
+              <!--   </div> -->
+              <!-- </li> -->
+              <!-- {% endfor %} -->
             </ol>
           </nav>
           <span class="flex items-center gap-4 text-black">
@@ -121,7 +140,21 @@
             >
           </span>
         </header>
-        <div class="bg-gray-100 p-4">{% block content %} {% endblock %}</div>
+        <div class="bg-blue-50 p-4">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div class="mb-4">
+            {% for category, message in messages %}
+            <div
+              id="alert-message"
+              class="p-4 mb-4 text-sm text-white rounded-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }}"
+            >
+              {{ message }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %} {% endwith %} {% block content %} {% endblock %}
+        </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>

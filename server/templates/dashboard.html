@@ -1,70 +1,62 @@
-{% extends "app.html"%}
+{% extends "app.html" %}
 
 {% block content %}
-<!-- <div class="container mx-auto p-4"> -->
-<!--         <h1 class="text-3xl font-bold mb-4">Website Brief: Encrypted File Upload and Download</h1> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Overview</h2> -->
-<!--         <p class="mb-4">Our website provides a secure platform for users to upload and download files with encryption. We support multiple encryption algorithms to ensure data security and privacy.</p> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Features</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>File Upload:</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Users can upload files through a simple and intuitive interface.</li> -->
-<!--                     <li>Files are encrypted using one of the supported encryption algorithms before being stored on the server.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>File Download:</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Users can download their previously uploaded files.</li> -->
-<!--                     <li>Files are decrypted on-the-fly during the download process.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Supported Encryption Algorithms</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>AES (Advanced Encryption Standard):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Strong symmetric encryption standard.</li> -->
-<!--                     <li>Suitable for securing sensitive data.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>RC4 (Rivest Cipher 4):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Stream cipher known for its simplicity and speed.</li> -->
-<!--                     <li>Suitable for applications where speed is critical.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--             <li class="mb-2"><strong>DES (Data Encryption Standard):</strong> -->
-<!--                 <ul class="list-disc list-inside ml-6"> -->
-<!--                     <li>Symmetric-key algorithm for the encryption of digital data.</li> -->
-<!--                     <li>Suitable for legacy systems and applications.</li> -->
-<!--                 </ul> -->
-<!--             </li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Security Measures</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Encryption Keys:</strong> Each file is encrypted with a unique key to ensure maximum security.</li> -->
-<!--             <li class="mb-2"><strong>Secure Storage:</strong> Encrypted files are stored securely on the server.</li> -->
-<!--             <li class="mb-2"><strong>User Authentication:</strong> Only authenticated users can upload and download files.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">User Interface</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Upload Page:</strong> Users can select files to upload and choose the encryption algorithm.</li> -->
-<!--             <li class="mb-2"><strong>Download Page:</strong> Users can view a list of their uploaded files and download them.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <h2 class="text-2xl font-semibold mb-2">Technical Stack</h2> -->
-<!--         <ul class="list-disc list-inside mb-4"> -->
-<!--             <li class="mb-2"><strong>Backend:</strong> Flask framework for handling file uploads, encryption, and downloads.</li> -->
-<!--             <li class="mb-2"><strong>Frontend:</strong> HTML, CSS, and JavaScript for a responsive and user-friendly interface.</li> -->
-<!--             <li class="mb-2"><strong>Encryption Libraries:</strong> Python libraries such as <code>pycryptodome</code> for implementing encryption algorithms.</li> -->
-<!--         </ul> -->
-<!--          -->
-<!--         <p class="mb-4">This brief outlines the core functionality and features of our website, ensuring a secure and user-friendly experience for encrypted file management.</p> -->
-<!--         </div> -->
+<h1 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
+
+<!-- Statistik Penggunaan -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <!-- Total Files -->
+    <div class="p-6 bg-white shadow-lg rounded-lg flex flex-col items-center">
+        <h2 class="text-gray-600 text-lg font-semibold">Total Files</h2>
+        <p class="text-4xl font-bold text-blue-500 mt-2">{{ total_files }}</p>
+        <span class="text-sm text-gray-400">Files Uploaded</span>
+    </div>
+
+    <!-- Total File Size -->
+    <div class="p-6 bg-white shadow-lg rounded-lg flex flex-col items-center">
+        <h2 class="text-gray-600 text-lg font-semibold">Total Size</h2>
+        <p class="text-4xl font-bold text-green-500 mt-2">{{ total_file_size // (1024*1024) }} MB</p>
+        <span class="text-sm text-gray-400">Data Stored</span>
+    </div>
+
+    <!-- Active Requests -->
+    <div class="p-6 bg-white shadow-lg rounded-lg flex flex-col items-center">
+        <h2 class="text-gray-600 text-lg font-semibold">Active Access Requests</h2>
+        <p class="text-4xl font-bold text-indigo-500 mt-2">{{ incoming_requests|length }}</p>
+        <span class="text-sm text-gray-400">Pending Approvals</span>
+    </div>
+</div>
+
+<!-- Log Aktivitas Terbaru dan File Dibagikan -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Log Aktivitas Terbaru -->
+    <div class="p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Recent Activity</h2>
+        <ul class="space-y-3">
+            {% for activity in recent_activity %}
+            <li class="flex justify-between text-gray-600">
+                <span>{{ activity.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                <span>{{ activity.activity_type|capitalize }} - {{ activity.details }}</span>
+            </li>
+            {% else %}
+            <li class="text-gray-400">No recent activity</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- File Terbaru yang Dibagikan -->
+    <div class="p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Recently Shared Files</h2>
+        <ul class="space-y-3">
+            {% for file in shared_files %}
+            <li class="flex justify-between text-gray-600">
+                <span>From {{ file.owner.username }}</span>
+                <span>Expires: {{ file.access_expiry.strftime('%Y-%m-%d') if file.access_expiry else 'No Expiry' }}</span>
+            </li>
+            {% else %}
+            <li class="text-gray-400">No shared files</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}
