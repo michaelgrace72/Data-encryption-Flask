@@ -1,0 +1,259 @@
+from flask import (
+    Flask,
+    render_template,
+    request,
+    url_for,
+    redirect,
+    flash,
+    send_file,
+    session,
+    g,
+)
+import io
+import os
+from flask_migrate import Migrate
+from model import db, User, AesFile, DesFile, Rc4File
+from Crypto.Cipher import AES, DES, ARC4
+from Crypto.Random import get_random_bytes
+from Crypto.Protocol.KDF import PBKDF2
+from config import Config
+import logging
+import time
+from contextlib import contextmanager
+from sqlalchemy import create_engine
+import base64
+
+# Load master key from environment variable
+MASTER_KEY = os.getenv("MASTER_KEY")
+if not MASTER_KEY:
+    raise EnvironmentError("MASTER_KEY environment variable not found. Please set it in ~/.bashrc")
+
+# Flask setup
+app = Flask(__name__)
+app.config.from_object(Config)
+db.init_app(app)
+migrate = Migrate(app, db)
+
+# Database connection
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+connection = engine.raw_connection()
+
+# Setup logging
+logging.basicConfig(filename='encryption_performance.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+error_logger = logging.getLogger('error_logger')
+error_handler = logging.FileHandler('error.log')
+error_handler.setLevel(logging.ERROR)
+error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+error_logger.addHandler(error_handler)
+
+app.config["UPLOAD_FOLDER"] = "uploads/"
+
+@contextmanager
+def large_object_cursor():
+    with connection.cursor() as cursor:
+        yield cursor
+    connection.commit()
+
+# Helper functions for encryption and decryption of user keys
+def encrypt_user_key(user_key, master_key):
+    # Generate a random salt and initialization vector (IV)
+    salt = get_random_bytes(16)
+    iv = get_random_bytes(16)
+    
+    # Derive a key from the master key and salt
+    derived_key = PBKDF2(master_key, salt, dkLen=32)
+    
+    # Encrypt the user's encryption key
+    cipher = AES.new(derived_key, AES.MODE_CFB, iv)
+    encrypted_key = cipher.encrypt(user_key)
+    
+    # Return the encrypted key along with the salt and IV for decryption
+    return base64.b64encode(salt + iv + encrypted_key).decode('utf-8')
+
+def decrypt_user_key(encrypted_key_b64, master_key):
+    # Decode the base64 string to get salt, IV, and encrypted key
+    encrypted_data = base64.b64decode(encrypted_key_b64)
+    salt, iv, encrypted_key = encrypted_data[:16], encrypted_data[16:32], encrypted_data[32:]
+    
+    # Derive the key using the same salt
+    derived_key = PBKDF2(master_key, salt, dkLen=32)
+    
+    # Decrypt the user's encryption key
+    cipher = AES.new(derived_key, AES.MODE_CFB, iv)
+    user_key = cipher.decrypt(encrypted_key)
+    return user_key
+
+# Function to ensure log header exists
+def ensure_log_header():
+    if not os.path.exists('performance.log'):
+        with open('performance.log', 'w') as perf_log:
+            perf_log.write("Operation,Method,File_OID,File_Size_Bytes,Time_Taken_Seconds\n")
+    else:
+        with open('performance.log', 'r+') as perf_log:
+            first_line = perf_log.readline()
+            if "Operation,Method,File_OID,File_Size_Bytes,Time_Taken_Seconds" not in first_line:
+                perf_log.seek(0, 0)
+                content = perf_log.read()
+                perf_log.seek(0, 0)
+                perf_log.write("Operation,Method,File_OID,File_Size_Bytes,Time_Taken_Seconds\n" + content)
+
+# Encrypt AES large file in chunks
+def encrypt_aes_file_in_chunks(file_oid, key, file_size):
+    ensure_log_header()  # Ensure the log file has a header
+    start_time = time.time()  # Start time tracking
+    cipher = AES.new(key, AES.MODE_EAX)
+    with large_object_cursor() as cursor:
+        lo = connection.lobject(file_oid, mode='rb')  # Open existing large object
+        encrypted_lo = connection.lobject(0, 'wb')    # Create new large object
+        
+        encrypted_lo.write(cipher.nonce)  # Write nonce (AES initialization vector)
+        chunk = lo.read(1024 * 1024)  # Read in 1MB chunks
+        
+        while chunk:
+            encrypted_lo.write(cipher.encrypt(chunk))
+            chunk = lo.read(1024 * 1024)
+            
+        lo.close()
+        encrypted_lo.close()
+        
+    end_time = time.time()  # End time tracking
+    time_taken = end_time - start_time
+    logging.info(f"AES encryption took {time_taken:.4f} seconds")
+    with open('performance.log', 'a') as perf_log:
+        perf_log.write(f"Encrypt,AES,{file_oid},{file_size},{time_taken:.4f}\n")
+    return encrypted_lo.oid  # Return the OID of the new encrypted large object
+
+# Encrypt DES large file in chunks
+def encrypt_des_file_in_chunks(file_oid, key, file_size):
+    ensure_log_header()  # Ensure the log file has a header
+    start_time = time.time()  # Start time tracking
+    cipher = DES.new(key[:8].ljust(8, b'\0'), DES.MODE_CFB)
+    with large_object_cursor() as cursor:
+        lo = connection.lobject(file_oid, mode='rb')  # Open existing large object
+        encrypted_lo = connection.lobject(0, 'wb')    # Create new large object
+        
+        encrypted_lo.write(cipher.iv)
+        chunk = lo.read(1024 * 1024)  # Read in 1MB chunks
+        while chunk:
+            encrypted_lo.write(cipher.encrypt(chunk))
+            chunk = lo.read(1024 * 1024)
+        
+        lo.close()
+        encrypted_lo.close()
+    
+    end_time = time.time()  # End time tracking
+    time_taken = end_time - start_time
+    logging.info(f"DES encryption took {time_taken:.4f} seconds")
+    with open('performance.log', 'a') as perf_log:
+        perf_log.write(f"Encrypt,DES,{file_oid},{file_size},{time_taken:.4f}\n")
+    return encrypted_lo.oid  # Return the OID of the new encrypted large object
+
+# Encrypt RC4 large file in chunks
+def encrypt_rc4_file_in_chunks(file_oid, key, file_size):
+    ensure_log_header()  # Ensure the log file has a header
+    start_time = time.time()  # Start time tracking
+    cipher = ARC4.new(key)
+    with large_object_cursor() as cursor:
+        lo = connection.lobject(file_oid, mode='rb')  # Open existing large object
+        encrypted_lo = connection.lobject(0, 'wb')    # Create new large object
+        
+        chunk = lo.read(1024 * 1024)  # Read in 1MB chunks
+        while chunk:
+            encrypted_lo.write(cipher.encrypt(chunk))
+            chunk = lo.read(1024 * 1024)
+        
+        lo.close()
+        encrypted_lo.close()
+    
+    end_time = time.time()  # End time tracking
+    time_taken = end_time - start_time
+    logging.info(f"RC4 encryption took {time_taken:.4f} seconds")
+    with open('performance.log', 'a') as perf_log:
+        perf_log.write(f"Encrypt,RC4,{file_oid},{file_size},{time_taken:.4f}\n")
+    return encrypted_lo.oid  # Return the OID of the new encrypted large object
+
+@app.route("/")
+def home():
+    return render_template("welcome.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash("Email address already exists", "warning")
+            return redirect(url_for("register"))
+
+        # Generate and encrypt user-specific encryption key
+        user_key = get_random_bytes(16)  # 128-bit user key
+        encrypted_user_key = encrypt_user_key(user_key, MASTER_KEY)
+
+        new_user = User(username=username, email=email)
+        new_user.set_password(password)
+        new_user.encryption_key = encrypted_user_key
+
+        db.session.add(new_user)
+        db.session.commit()
+        flash("Account created successfully", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            session["user_id"] = user.id
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid email or password", "danger")
+            return redirect(url_for("login"))
+    return render_template("login.html")
+
+@app.route("/encrypt", methods=["GET", "POST"])
+def encrypt():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        encryption_method = request.form.get("encryption")
+        file = request.files.get("file")
+        user_id = session.get("user_id")
+
+        if not encryption_method or encryption_method == "Choose an encryption method":
+            flash("Please select an encryption method", "danger")
+            return redirect(url_for("encrypt"))
+
+        if not file:
+            flash("No file selected", "danger")
+            return redirect(url_for("encrypt"))
+
+        try:
+            user = User.query.get(user_id)
+            
+            # Decrypt user's encryption key
+            user_key = decrypt_user_key(user.encryption_key, MASTER_KEY)
+
+            # Encrypt file using the user's key (not shown here, use your file encryption logic)
+
+            flash("File encrypted successfully", "success")
+            return redirect(url_for("encrypt"))
+
+        except Exception as e:
+            flash(f"An error occurred: {str(e)}", "danger")
+            return redirect(url_for("encrypt"))
+
+    return render_template("encrypt.html", current_page="Encrypt")
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)

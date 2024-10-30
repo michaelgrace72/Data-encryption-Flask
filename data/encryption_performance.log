@@ -1,0 +1,53 @@
+2024-10-29 16:39:22,733 - AES decryption took 0.0601 seconds
+2024-10-29 16:40:48,786 - AES decryption took 0.0660 seconds
+2024-10-29 16:44:10,736 - AES decryption took 0.0564 seconds
+2024-10-29 16:45:17,562 - AES decryption took 0.0599 seconds
+2024-10-29 16:47:25,030 - AES decryption took 0.0145 seconds
+2024-10-29 16:51:03,842 - AES encryption took 0.0368 seconds
+2024-10-29 16:51:19,493 - AES decryption took 0.0097 seconds
+2024-10-29 17:01:59,957 - AES decryption took 0.0130 seconds
+2024-10-29 17:02:14,331 - AES decryption took 0.0105 seconds
+2024-10-29 17:19:02,533 - AES decryption took 0.0221 seconds
+2024-10-29 17:20:16,794 - AES decryption took 0.0616 seconds
+2024-10-29 17:38:59,405 - Starting download file process
+2024-10-29 17:39:07,305 - Starting download file process
+2024-10-29 17:39:07,432 - Successfully decrypted sharing key.
+2024-10-29 17:39:07,494 - AES decryption took 0.0587 seconds
+2024-10-29 17:39:07,494 - File decrypted successfully.
+2024-10-29 17:43:03,404 - Starting download file process
+2024-10-29 17:43:10,955 - Starting download file process
+2024-10-29 17:43:11,104 - Successfully decrypted sharing key.
+2024-10-29 17:43:11,120 - AES decryption took 0.0131 seconds
+2024-10-29 17:43:11,120 - File decrypted successfully.
+2024-10-29 17:46:54,961 - Starting download file process
+2024-10-29 17:49:38,504 - Starting download file process
+2024-10-29 17:51:38,164 - Starting download file process
+2024-10-29 17:52:11,102 - Starting download file process
+2024-10-29 17:52:11,215 - Successfully decrypted sharing key.
+2024-10-29 17:52:11,243 - Starting download file process
+2024-10-29 17:52:11,279 - AES decryption took 0.0597 seconds
+2024-10-29 17:52:11,280 - File decrypted successfully.
+2024-10-29 17:52:11,352 - Successfully decrypted sharing key.
+2024-10-29 17:52:11,418 - AES decryption took 0.0639 seconds
+2024-10-29 17:52:11,418 - File decrypted successfully.
+2024-10-29 17:52:28,041 - Starting download file process
+2024-10-29 17:52:38,311 - Starting download file process
+2024-10-29 17:52:38,413 - Successfully decrypted sharing key.
+2024-10-29 17:52:38,432 - AES decryption took 0.0154 seconds
+2024-10-29 17:52:38,432 - File decrypted successfully.
+2024-10-29 18:00:36,254 - Starting download file process
+2024-10-29 18:00:36,377 - AES decryption took 0.0132 seconds
+2024-10-29 18:06:30,945 - AES encryption took 0.2136 seconds
+2024-10-29 18:07:19,395 - Owner Key after decryption: b'\xb7\xb4\x0e\x8eE \xedw\xdc\xcd\xde\x11\xc4E|O'
+2024-10-29 18:07:19,404 - Owner Key after re-encryption with requester's public key: rXMX+agAVwvAqm7r3Ny+ZxtOVMiHfGwZgP53I/Ackn8MrpHY+1lIznnbPVaVi86c+7fG48E53b5jNwJR6g/x4U03JBjuwJ7CmsaKa84RH5RIKwnuz7klLqiuL1lfS7MOuhG6m/dYvnGMskSO+pPYH15mNYx0ekXIo24s9pbQBhcSHHZnree5xJ55an0n4cuv1cigSvoXOJvGK51pQc8MHXLGsZxxGzd3L/68o/qALuXFN7uVySxf2pCYaRj4dXF9mWKmAqDe6RAxnE8kIo6hHtKRAi/Dvh8QfU+Bfo2ioZL8MpkVMAaC4XDKab/81g3Ap51nVbLZT52sTwvOehRtfA==
+2024-10-29 18:07:59,719 - Starting download file process
+2024-10-29 18:07:59,841 - Decrypted owner key used for file decryption: b'\xb7\xb4\x0e\x8eE \xedw\xdc\xcd\xde\x11\xc4E|O'
+2024-10-29 18:07:59,912 - AES decryption took 0.0690 seconds
+2024-10-29 18:09:04,176 - RC4 encryption took 0.0328 seconds
+2024-10-29 18:09:13,614 - Starting download file process
+2024-10-29 18:09:13,687 - Decrypted owner key used for file decryption: b'\xb7\xb4\x0e\x8eE \xedw\xdc\xcd\xde\x11\xc4E|O'
+2024-10-29 18:09:13,698 - RC4 decryption took 0.0091 seconds
+2024-10-29 18:10:29,451 - DES encryption took 1.1492 seconds
+2024-10-29 18:10:39,630 - Starting download file process
+2024-10-29 18:10:39,728 - Decrypted owner key used for file decryption: b'\xb7\xb4\x0e\x8eE \xedw\xdc\xcd\xde\x11\xc4E|O'
+2024-10-29 18:10:40,655 - DES decryption took 0.9248 seconds
