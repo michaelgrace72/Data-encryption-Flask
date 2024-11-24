@@ -1,30 +1,81 @@
+import base64
 from flask import (
     Flask,
     render_template,
     request,
-    url_for,
     redirect,
+    url_for,
     flash,
     send_file,
     session,
     g,
 )
+from werkzeug.utils import secure_filename
 import io
+import uuid
 import os
-import hashlib
+import logging
+import time
+from datetime import datetime, timedelta, timezone
+from contextlib import contextmanager
+from sqlalchemy import create_engine
+
 from flask_migrate import Migrate
-from model import db, User, AesFile, DesFile, Rc4File, ShareRequest, UserKeys, ActivityLog
-from Crypto.Cipher import AES, DES, ARC4,PKCS1_OAEP
+from model import (
+    db,
+    User,
+    AesFile,
+    DesFile,
+    Rc4File,
+    ShareRequest,
+    UserKeys,
+    ActivityLog,
+    UserFile,
+)
+from config import Config
+
+from Crypto.Cipher import AES, DES, ARC4, PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import RSA
 from Crypto.Protocol.KDF import PBKDF2
-from config import Config
+from Crypto.Signature import pkcs1_15
+from Crypto.Hash import SHA256
+
+from utils.crypto_utils import encrypt_private_key, decrypt_private_key
+
+from PyPDF2 import PdfReader, PdfWriter
+from pyhanko.sign import signers
+from pyhanko.sign.fields import append_signature_field, SigFieldSpec
+from pyhanko_certvalidator import ValidationContext
+from pyhanko.sign.general import load_certs_from_pemder
+from pyhanko.sign.validation import validate_pdf_signature
+from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
+
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes, serialization
+
+from base64 import b64encode, b64decode
+from hashlib import pbkdf2_hmac
+import hashlib
+
+
+CERTIFICATE_PATH = "certificates/certificate_no_password.p12"
+CERTIFICATE_PASSWORD = b"MySafePass"  # Byte string for password
+
+
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import io
 import logging
-import time
-import base64
-from contextlib import contextmanager
-from sqlalchemy import create_engine
-from datetime import datetime, timedelta
+from PyPDF2 import PdfReader, PdfWriter
+from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes
+import os
+import uuid
+
+CERTIFICATE_PATH = "certificates/certificate_no_password.p12"
+CERTIFICATE_PASSWORD = b"MySafePass"  # Byte string for password
 
 
 # Load master key from environment variable
@@ -45,6 +96,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
+app.secret_key = 'your_secret_key'  # Ganti dengan kunci rahasia Anda
 
 # Setup logging
 logging.basicConfig(filename='encryption_performance.log', level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -86,7 +138,12 @@ def decrypt_user_key(encrypted_key_b64, master_key):
 
 @app.route("/")
 def home():
-    return render_template("welcome.html")
+    """Halaman utama: arahkan ke dashboard jika sudah login."""
+    if "user_id" in session:
+        # Jika pengguna sudah login, arahkan ke dashboard
+        return redirect(url_for("dashboard"))
+    # Jika belum login, arahkan ke halaman login
+    return redirect(url_for("login"))
 
 # Function to ensure log header exists
 def ensure_log_header():
@@ -289,19 +346,6 @@ def generate_user_keypair():
     public_key = key.publickey().export_key()
     return public_key, private_key
 
-def encrypt_private_key(private_key, user_key):
-    """Encrypt user's private key with their symmetric key"""
-    cipher = AES.new(user_key, AES.MODE_EAX)
-    nonce = cipher.nonce
-    encrypted_data = cipher.encrypt(private_key)
-    return base64.b64encode(nonce + encrypted_data).decode('utf-8')
-
-def decrypt_private_key(encrypted_private_key, user_key):
-    """Decrypt user's private key with their symmetric key"""
-    encrypted_data = base64.b64decode(encrypted_private_key.encode('utf-8'))
-    nonce = encrypted_data[:16]
-    cipher = AES.new(user_key, AES.MODE_EAX, nonce=nonce)
-    return cipher.decrypt(encrypted_data[16:])
 
 def encrypt_sharing_key(sharing_key, public_key):
     """Encrypt the sharing key with recipient's public key"""
@@ -314,10 +358,16 @@ def log_activity(user_id, activity_type, details):
     new_log = ActivityLog(user_id=user_id, activity_type=activity_type, details=details)
     db.session.add(new_log)
     db.session.commit()
- 
+
+
 @app.context_processor
 def inject_base_url():
     return {"base_url": url_for("dashboard")}
+
+@app.before_request
+def load_logged_in_user():
+    """Load user information into the global variable `g`"""
+    g.username = session.get("username")
 
 @app.route("/dashboard")
 def dashboard():
@@ -406,6 +456,7 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html")
+
 
 @app.route("/choose_user")
 def choose_user():
@@ -833,32 +884,34 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        # Temukan pengguna berdasarkan email
+        # Find the user by email
         user = User.query.filter_by(email=email).first()
         
-        # Verifikasi password
+        # Verify password
         if user and user.check_password(password):
-            # Simpan ID pengguna dan username di session
+            # Store user ID and username in the session
             session["user_id"] = user.id
-            session["username"] = user.username  # Simpan username di sesi
+            session["username"] = user.username
             session.permanent = True
             
-            # Dekripsi kunci pengguna (user_key) menggunakan MASTER_KEY dan simpan di sesi
+            # Attempt to decrypt the user's key
             try:
                 user_key = decrypt_user_key(user.encryption_key, MASTER_KEY)
-                session["user_key"] = user_key  # Simpan user_key di sesi
+                session["user_key"] = user_key  # Store user_key in session only if decryption is successful
             except Exception as e:
-                flash("Error decrypting user key.", "danger")
-                return redirect(url_for("login"))
-
-            # Berikan pesan berhasil dan arahkan ke dashboard
+                # Log the decryption error for debugging
+                print(f"Error decrypting user key: {e}")
+                flash("Logged in successfully, but there was an issue with your encryption key.", "warning")
+            
+            # Redirect to dashboard after successful login
             flash("Login successful", "success")
             return redirect(url_for("dashboard"))
         else:
+            # Invalid email or password
             flash("Invalid email or password", "danger")
             return redirect(url_for("login"))
     
-    # Render halaman login jika metode GET
+    # Render login page if GET request
     return render_template("login.html")
 
 @app.route("/encrypt", methods=["GET", "POST"])
@@ -925,6 +978,159 @@ def encrypt():
             return redirect(url_for("encrypt"))
 
     return render_template("encrypt.html")
+
+
+@app.route('/upload_and_sign', methods=['GET', 'POST'])
+def upload_and_sign():
+    if "user_id" not in session:
+        flash("Please log in to continue.", "warning")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file or not file.filename:
+            flash("No file selected", "danger")
+            return redirect(url_for('upload_and_sign'))
+
+        if not file.filename.lower().endswith('.pdf'):
+            flash("Only PDF files are allowed", "danger")
+            return redirect(url_for('upload_and_sign'))
+
+        try:
+            # Validate the uploaded PDF
+            file_stream = io.BytesIO(file.read())
+            try:
+                pdf_reader = PdfReader(file_stream)
+                num_pages = len(pdf_reader.pages)
+                if num_pages < 1:
+                    raise ValueError("PDF file appears to be empty")
+            except Exception as e:
+                flash("Invalid or corrupted PDF file", "danger")
+                return redirect(url_for('upload_and_sign'))
+
+            # Reset the file pointer for processing
+            file_stream.seek(0)
+            pdf_content = file_stream.read()
+
+            # Load the PKCS#12 certificate and private key
+            with open(CERTIFICATE_PATH, 'rb') as cert_file:
+                p12_data = cert_file.read()
+            private_key, certificate, _ = load_key_and_certificates(
+                p12_data, CERTIFICATE_PASSWORD
+            )
+
+            # Create the digital signature
+            signature = private_key.sign(
+                pdf_content,
+                padding.PKCS1v15(),
+                hashes.SHA256()
+            )
+
+            # Add signature to the PDF metadata
+            writer = PdfWriter()
+            reader = PdfReader(io.BytesIO(pdf_content))
+
+            for page in reader.pages:
+                writer.add_page(page)
+
+            # Add metadata for signature
+            signature_id = str(uuid.uuid4())
+            metadata = {
+                '/Signature': f'{signature_id}',
+                '/SignerName': 'Test Signer',
+                '/SigningTime': datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
+                '/SignatureReason': 'Document Signing Example',
+                '/SignatureContents': signature.hex(),
+                '/Certificate': certificate.public_bytes(
+                    encoding=serialization.Encoding.PEM
+                ).decode('utf-8')
+            }
+
+            writer.add_metadata(metadata)
+
+            # Save signed PDF
+            signed_pdf = io.BytesIO()
+            writer.write(signed_pdf)
+            signed_pdf.seek(0)
+
+            signed_filename = f"signed_{secure_filename(file.filename)}"
+
+            # Save signed file to the database
+            user_file = UserFile(
+                user_id=user_id,
+                filename=signed_filename,
+                filetype="pdf",
+                file_data=signed_pdf.read(),
+                uploaded_at=datetime.utcnow()
+            )
+
+            db.session.add(user_file)
+            db.session.commit()
+
+            flash("File signed and uploaded successfully", "success")
+            return redirect(url_for('upload_and_sign'))
+
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error during PDF signing: {e}")
+            flash(f"An error occurred: {str(e)}", "danger")
+            return redirect(url_for('upload_and_sign'))
+
+    # GET request - Display uploaded files
+    files = UserFile.query.filter_by(user_id=user_id).all()
+    return render_template('upload_and_sign.html', files=files)
+
+@app.route('/upload_and_sign/download/<int:file_id>', methods=['GET'])
+def download_user_file(file_id):
+    if "user_id" not in session:
+        flash("Please log in to continue.", "warning")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    try:
+        user_file = UserFile.query.filter_by(id=file_id, user_id=user_id).first()
+        if not user_file:
+            flash("File not found or unauthorized access.", "danger")
+            return redirect(url_for('upload_and_sign'))
+
+        return send_file(
+            io.BytesIO(user_file.file_data),
+            download_name=user_file.filename,
+            as_attachment=True,
+            mimetype="application/pdf"
+        )
+    except Exception as e:
+        logging.error(f"Error during file download: {e}")
+        flash(f"An error occurred while downloading the file: {str(e)}", "danger")
+        return redirect(url_for('upload_and_sign'))
+
+
+@app.route('/upload_and_sign/delete/<int:file_id>', methods=['POST'])
+def delete_file(file_id):
+    if "user_id" not in session:
+        flash("Please log in to continue.", "warning")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    try:
+        user_file = UserFile.query.filter_by(id=file_id, user_id=user_id).first()
+        if not user_file:
+            flash("File not found or unauthorized access.", "danger")
+            return redirect(url_for('upload_and_sign'))
+
+        db.session.delete(user_file)
+        db.session.commit()
+
+        flash("File deleted successfully", "success")
+        return redirect(url_for('upload_and_sign'))
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error during file deletion: {e}")
+        flash(f"An error occurred while deleting the file: {str(e)}", "danger")
+        return redirect(url_for('upload_and_sign'))
+
 
 # Perbaikan untuk fungsi decrypt di route /decrypt
 @app.route("/decrypt", methods=["POST", "GET"])

@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.dialects.postgresql import OID
+from sqlalchemy import Column, Integer, String, ForeignKey, LargeBinary, Text, DateTime, Boolean
+from sqlalchemy.orm import relationship
 from datetime import datetime
 
 db = SQLAlchemy()
@@ -110,3 +112,17 @@ class ActivityLog(db.Model):
     
     def __repr__(self):
         return f"<ActivityLog {self.activity_type} by {self.user_id}>"
+
+class UserFile(db.Model):
+    __tablename__ = 'user_file'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    filetype = db.Column(db.String(255), nullable=False)
+    file_data = db.Column(db.LargeBinary, nullable=False)  # Simpan data file sebagai binary
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_private = db.Column(db.Boolean, default=True)  # Menjaga privasi file
+
+    def __repr__(self):
+        return f"<UserFile {self.filename} for User ID {self.user_id}>"

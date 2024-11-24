@@ -12,4 +12,13 @@ dist/
 htmlcov/
 .tox/
 docs/_build/
-uploads/
+server/uploads*/
+server/utils*/
+server/migrations*/
+server/performance.log
+server/tes1.py
+server/tes2.py
+server/certificates*/
+server/error.log
+server/config.py
+server/encryption_performance.log
