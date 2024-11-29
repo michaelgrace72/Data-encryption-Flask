@@ -13,7 +13,6 @@ htmlcov/
 .tox/
 docs/_build/
 server/uploads*/
-server/utils*/
 server/migrations*/
 server/performance.log
 server/tes1.py

@@ -58,21 +58,18 @@ from base64 import b64encode, b64decode
 from hashlib import pbkdf2_hmac
 import hashlib
 
-
-CERTIFICATE_PATH = "certificates/certificate_no_password.p12"
-CERTIFICATE_PASSWORD = b"MySafePass"  # Byte string for password
-
-
-from werkzeug.utils import secure_filename
-from datetime import datetime
-import io
-import logging
 from PyPDF2 import PdfReader, PdfWriter
 from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 import os
 import uuid
+
+CERTIFICATE_PATH = "certificates/certificate_no_password.p12"
+CERTIFICATE_PASSWORD = b"MySafePass"  # Byte string for password
+
+
+
 
 CERTIFICATE_PATH = "certificates/certificate_no_password.p12"
 CERTIFICATE_PASSWORD = b"MySafePass"  # Byte string for password
